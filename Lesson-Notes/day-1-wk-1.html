@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 1, Week 1, Session 1: Web Architecture & Semantic HTML5</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background: #fdfdfd;
+            --text-color: #333;
+            --code-bg: #f4f6f8;
+            --border-color: #e1e4e8;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--background);
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+        header.textbook-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        h1, h2, h3, h4 {
+            color: var(--primary-color);
+            margin-top: 2.5rem;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { 
+            font-size: 1.8rem; 
+            border-bottom: 2px solid var(--border-color); 
+            padding-bottom: 0.5rem; 
+        }
+        p { margin-bottom: 1.2rem; }
+        ul, ol { margin-bottom: 1.5rem; padding-left: 2rem; }
+        li { margin-bottom: 0.5rem; }
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1.2rem;
+            overflow-x: auto;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.95rem;
+        }
+        .diagram-box {
+            border: 2px dashed #95a5a6;
+            background-color: #fafbfc;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-style: italic;
+            color: #555;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0; }
+    </style>
+</head>
+<body>
+
+    <header class="textbook-header">
+        <p><strong>PRACTICAL SOFTWARE ENGINEERING PROGRAM</strong></p>
+        <h1>Day 1, Week 1, Session 1</h1>
+        <p><em>Module: Web Architecture & Semantic HTML5</em></p>
+    </header>
+
+    <section id="theory-big-picture">
+        <h2>1. Theory: The Big Picture</h2>
+        <p>Before writing a single line of production code, a software engineer must possess a robust mental model of the environment in which their applications operate. The modern web is fundamentally built on the <strong>Client-Server Architecture</strong>[cite: 1].</p>
+        
+        <p>When a user interacts with a web application, they act as the <em>client</em>, typically through a web browser. The client requests resources (such as HTML documents, stylesheets, or JSON data) from a remote machine known as the <em>server</em>. This data exchange is governed by the <strong>HTTP and HTTPS</strong> (Hypertext Transfer Protocol / Secure) standards[cite: 1].</p>
+
+        <div class="diagram-box">
+            <strong>[Textual Diagram: The Request-Response Cycle]</strong><br><br>
+            [ Client / Browser ] --- (1) User types URL & hits Enter ---> [ DNS Server ]<br>
+            [ DNS Server ] --- (2) Returns IP Address (e.g., 104.21.5.14) ---> [ Client / Browser ]<br>
+            [ Client / Browser ] --- (3) HTTP GET Request ---> [ Web Server ]<br>
+            [ Web Server ] --- (4) HTTP Response (200 OK + HTML Payload) ---> [ Client / Browser (Renders UI) ]
+        </div>
+
+        <p>Understanding the <strong>DNS</strong> (Domain Name System) resolution and the HTTP request/response cycle is non-negotiable for full-stack developers[cite: 1]. Every backend API endpoint, dynamic user interface, and cloud deployment strategy you will build in the coming weeks relies entirely on the precise manipulation of these HTTP transactions.</p>
+    </section>
+
+    <section id="theory-semantic-web">
+        <h2>2. Theory: Semantic Web</h2>
+        <p>Hypertext Markup Language (HTML) provides the structural skeleton of web documents. Historically, web developers relied heavily on generic container tags (like <code>&lt;div&gt;</code> and <code>&lt;span&gt;</code>), leading to documents that were visually functional but programmatically meaningless—a practice often referred to as "div soup."</p>
+
+        <p>Modern engineering standards demand the use of <strong>Semantic HTML5</strong>[cite: 1]. Semantic tags convey the exact meaning and role of the enclosed content to the browser, search engine crawlers, and assistive technologies.</p>
+
+        <h3>Core Semantic Document Structures</h3>
+        <p>Instead of relying on generic wrappers, we use dedicated structural tags[cite: 1]:</p>
+        <ul>
+            <li><code>&lt;header&gt;</code>: Represents introductory content, typically containing headings, logos, or primary navigation[cite: 1].</li>
+            <li><code>&lt;main&gt;</code>: Defines the primary, unique content of the document. There should be only one visible <code>&lt;main&gt;</code> element per page[cite: 1].</li>
+            <li><code>&lt;article&gt;</code>: Represents a self-contained, independent piece of content that could be distributed on its own (e.g., a blog post, a user review, or a specific job role on a CV)[cite: 1].</li>
+            <li><code>&lt;section&gt;</code>: Groups thematically related content, usually introduced by its own heading.</li>
+            <li><code>&lt;footer&gt;</code>: Contains structural closing elements, such as copyright data, author information, and secondary navigational links[cite: 1].</li>
+        </ul>
+
+        <div class="note">
+            <strong>Industry Relevance:</strong> Semantic HTML directly impacts Accessibility (A11y) and Search Engine Optimization (SEO). A screen reader used by a visually impaired user can instantly navigate to a <code>&lt;nav&gt;</code> or <code>&lt;main&gt;</code> tag, bypassing repetitive header content. A search engine interprets an <code>&lt;article&gt;</code> as high-value content compared to a generic <code>&lt;div&gt;</code>.
+        </div>
+    </section>
+
+    <section id="lab-environment-setup">
+        <h2>3. Lab: Environment Setup</h2>
+        <p>To transition into practical application development, we must establish a professional local development environment. We will utilize <strong>Visual Studio Code (VS Code)</strong>, the premier IDE for web development[cite: 1].</p>
+
+        <h3>Step-by-Step Configuration</h3>
+        <ol>
+            <li><strong>Installation:</strong> Download and install the latest stable build of VS Code from <code>code.visualstudio.com</code>[cite: 1].</li>
+            <li><strong>Workspace Initialization:</strong> Open your system terminal and create a dedicated workspace directory for this curriculum.
+<pre><code>mkdir practical-se-program
+cd practical-se-program
+mkdir week1-session1-cv
+cd week1-session1-cv
+code .</code></pre>
+            </li>
+            <li><strong>Configure Extensions:</strong> Open the Extensions marketplace in VS Code (Ctrl+Shift+X or Cmd+Shift+X) and install the following essential tooling[cite: 1]:
+                <ul>
+                    <li><strong>Live Server (by Ritwick Dey):</strong> Deploys a local development server with hot-reloading capabilities, eliminating the need to manually refresh the browser upon saving files.</li>
+                    <li><strong>Prettier - Code Formatter:</strong> Enforces standard indentation. Ensure you configure VS Code to "Format On Save".</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section id="lab-guided-coding">
+        <h2>4. Lab: Guided Coding</h2>
+        <p>In this lab, we will translate theory into practice by constructing a professional CV layout using strictly semantic HTML5 markup[cite: 1]. At this stage, we are engineering raw structure—there is no CSS attached, meaning the browser will render it using standard, unstyled document flow.</p>
+
+        <p>Create a file named <code>index.html</code> in your VS Code workspace and write the following code:</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;!-- Metadata for the browser and search engines --&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;meta name="description" content="Professional CV for an IT Software Engineering Student"&gt;
+    &lt;title&gt;Jane Doe | Software Engineer&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;!-- Document Header: Identity and Navigation --&gt;
+    &lt;header&gt;
+        &lt;h1&gt;Jane Doe&lt;/h1&gt;
+        &lt;p&gt;Full-Stack Software Engineering IT Student&lt;/p&gt;
+        &lt;nav&gt;
+            &lt;ul&gt;
+                &lt;li&gt;&lt;a href="#summary"&gt;Summary&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="#experience"&gt;Experience&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href="#education"&gt;Education&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/nav&gt;
+    &lt;/header&gt;
+
+    &lt;!-- Document Main: Core Content --&gt;
+    &lt;main&gt;
+        
+        &lt;!-- Thematic Section: Professional Summary --&gt;
+        &lt;section id="summary"&gt;
+            &lt;h2&gt;Professional Summary&lt;/h2&gt;
+            &lt;p&gt;
+                Detail-oriented Computer Science student seeking Industrial Training. 
+                Passionate about web architecture, semantic markup, and building scalable 
+                backend systems.
+            &lt;/p&gt;
+        &lt;/section&gt;
+
+        &lt;!-- Thematic Section: Work Experience --&gt;
+        &lt;section id="experience"&gt;
+            &lt;h2&gt;Work Experience&lt;/h2&gt;
+            
+            &lt;!-- Article: Independent self-contained unit of information --&gt;
+            &lt;article&gt;
+                &lt;h3&gt;Backend Development Intern&lt;/h3&gt;
+                &lt;p&gt;&lt;strong&gt;Company:&lt;/strong&gt; Tech Solutions Ltd. | &lt;strong&gt;Dates:&lt;/strong&gt; Jan 2026 - Present&lt;/p&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;Assisted in architecting RESTful APIs using Python.&lt;/li&gt;
+                    &lt;li&gt;Drafted technical documentation for client-server data flow.&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/article&gt;
+        &lt;/section&gt;
+
+        &lt;!-- Thematic Section: Education --&gt;
+        &lt;section id="education"&gt;
+            &lt;h2&gt;Education&lt;/h2&gt;
+            &lt;article&gt;
+                &lt;h3&gt;B.Sc. Computer Science&lt;/h3&gt;
+                &lt;p&gt;&lt;strong&gt;Institution:&lt;/strong&gt; State University of Technology | &lt;strong&gt;Expected:&lt;/strong&gt; 2027&lt;/p&gt;
+            &lt;/article&gt;
+        &lt;/section&gt;
+
+    &lt;/main&gt;
+
+    &lt;!-- Document Footer: Closing Data --&gt;
+    &lt;footer&gt;
+        &lt;p&gt;&amp;copy; 2026 Jane Doe. Built for the Practical Software Engineering IT Program.&lt;/p&gt;
+        &lt;p&gt;View my projects on &lt;a href="https://github.com" target="_blank"&gt;GitHub&lt;/a&gt;.&lt;/p&gt;
+    &lt;/footer&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h3>Debugging and Workflow Notes</h3>
+        <p>Right-click the <code>index.html</code> file in your editor and select <strong>"Open with Live Server"</strong>. Your default browser will launch, rendering the document. Notice how the browser natively interprets the structural hierarchy of <code>&lt;h1&gt;</code> through <code>&lt;h3&gt;</code> tags, and how the anchor tags (<code>&lt;a href="#experience"&gt;</code>) allow immediate page routing to specific section IDs.</p>
+    </section>
+
+    <section id="debrief-homework">
+        <h2>5. Debrief and Homework</h2>
+        <p>In this session, you successfully bypassed the abstract layer of the internet to understand the fundamental client-server handshake, DNS resolution, and the HTTP request cycle[cite: 1]. You deployed a professional IDE workspace, implemented extensions to accelerate your development speed, and engineered a logically sound, highly accessible CV using modern semantic HTML5[cite: 1].</p>
+        
+        <h3>Homework Assignments</h3>
+        <ol>
+            <li><strong>Research:</strong> Read the official documentation on how modern browsers parse HTML and actively construct the Document Object Model (DOM)[cite: 1].</li>
+            <li><strong>Practical Extension:</strong> Add a new <code>&lt;section id="contact"&gt;</code> at the bottom of the <code>&lt;main&gt;</code> tag in your CV layout. Within this section, engineer a user contact/feedback form[cite: 1]. You must research and properly utilize the <code>&lt;form&gt;</code>, <code>&lt;label&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code>, and <code>&lt;button&gt;</code> semantic tags.</li>
+        </ol>
+    </section>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Enrollment form and DOM Mapping</title>
+  </head>
+  <body>
+    <header>
+      <h1>Software Engineering IT Enrollment</h1>
+    </header>
+
+    <main>
+      <!-- Action represents the backend API route: Method dictates the HTTP verb -->
+      <form action="" method="post">
+        <!-- Parent Node 1: Personal Details Fieldset -->
+        <fieldset>
+          <legend>Trainee Identity</legend>
+
+          <div>
+            <label for="matricNumber">University Matricaulation No:</label>
+            <!-- Pattern enforces 2 letters followed by 6 digits -->
+            <input
+              type="text"
+              id="matricNumber"
+              name="matricNumber"
+              pattern="[A-Za-z]{2}\d{6}"
+              title="Example: CS123456"
+              required
+            />
+          </div>
+
+          <div>
+            <label for="dob">Date of Birth:</label>
+            <!-- max restricts dates to past dates for validity -->
+            <input type="date" id="dob" name="dob" max="2010-01-01" min="2008-01-01" required />
+          </div>
+        </fieldset>
+
+        <!-- Parent Node 2: Technical Background Fieldset -->
+        <fieldset>
+          <legend>Curriculum Prefrences</legend>
+          <div>
+            <label for="track">Primary Track:</label>
+            <!-- Select dropdown Node -->
+            <select name="track" id="track" required>
+              <option value="" disabled selected>Select Track...</option>
+              <option value="frontend">Frontend Engineering</option>
+              <option value="backend">Backend Architecture</option>
+              <option value="full-stack">Fullstack Development</option>
+            </select>
+          </div>
+
+          <div>
+            <p>Programming Languages known:</p>
+            <!-- Checkboxes Sibling Nodes -->
+            <label for="checkbox">
+              <input type="checkbox" name="languages" value="python" />Python
+            </label>
+            <label for="checkbox">
+              <input type="checkbox" name="languages" value="c" />C/C++
+            </label>
+            <label for="checkbox">
+              <input type="checkbox" name="languages" value="javascript" />Javascript
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Submit Button -->
+        <button type="submit">Finalise Enrollment</button>
+      </form>
+    </main>
+  </body>
+</html>

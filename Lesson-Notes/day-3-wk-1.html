@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Day 3, Week 1, Session 3: Local & Remote Version Control with Git & GitHub
+    </title>
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #3498db;
+        --background: #fdfdfd;
+        --text-color: #333;
+        --code-bg: #f4f6f8;
+        --border-color: #e1e4e8;
+      }
+      body {
+        font-family:
+          "Segoe UI",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        line-height: 1.7;
+        color: var(--text-color);
+        background-color: var(--background);
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 2rem 5rem 2rem;
+      }
+      header.textbook-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 3px solid var(--primary-color);
+      }
+      h1,
+      h2,
+      h3,
+      h4 {
+        color: var(--primary-color);
+        margin-top: 2.5rem;
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+      h2 {
+        font-size: 1.8rem;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.5rem;
+      }
+      p {
+        margin-bottom: 1.2rem;
+      }
+      ul,
+      ol {
+        margin-bottom: 1.5rem;
+        padding-left: 2rem;
+      }
+      li {
+        margin-bottom: 0.5rem;
+      }
+      pre {
+        background-color: var(--code-bg);
+        border: 1px solid var(--border-color);
+        border-left: 4px solid var(--secondary-color);
+        padding: 1.2rem;
+        overflow-x: auto;
+        border-radius: 4px;
+        font-family: "Fira Code", "Courier New", Courier, monospace;
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+      code {
+        font-family: "Fira Code", "Courier New", Courier, monospace;
+        background-color: var(--code-bg);
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.95rem;
+      }
+      .diagram-box {
+        border: 2px dashed #95a5a6;
+        background-color: #fafbfc;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        text-align: center;
+        font-style: italic;
+        color: #555;
+        font-family: monospace;
+        white-space: pre;
+        text-align: left;
+      }
+      .note {
+        background-color: #e8f4f8;
+        border-left: 4px solid var(--secondary-color);
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 0 4px 4px 0;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid var(--border-color);
+        margin: 3rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="textbook-header">
+      <p><strong>PRACTICAL SOFTWARE ENGINEERING PROGRAM</strong></p>
+      <h1>Day 3, Week 1, Session 3</h1>
+      <p><em>Module: Local & Remote Version Control with Git & GitHub</em></p>
+    </header>
+
+    <section id="theory-big-picture">
+      <h2>1. Theory: The Big Picture</h2>
+      <p>
+        As software projects scale, managing code changes becomes exponentially
+        complex. Professional software engineering fundamentally relies on
+        <strong>Version Control Systems (VCS)</strong>. Without a VCS,
+        developers resort to creating endless, confusing file copies (e.g.,
+        <code>index_final_v2_USE_THIS_ONE.html</code>). <strong>Git</strong> is
+        the industry-standard distributed version control system that eliminates
+        this chaos by providing a highly detailed, navigable timeline of your
+        codebase.
+      </p>
+
+      <p>
+        Git operates through a strict conceptual model of state management. A
+        file in Git is always in one of three local states before being pushed
+        to a remote server like GitHub:
+      </p>
+
+      <div class="diagram-box">
+        [Textual Diagram: The Four Environments of Git] 
+        1. Working Directory (Untracked/Modified) 
+            │ 
+            ├── (git add) ──&gt; ▼ 2. Staging Area (Index - Prepared for Commit) 
+            │ 
+            ├── (git commit) ──&gt; ▼ 3. Local Repository (.git folder - Permanent Local Snapshot) 
+            │ 
+            ├── (git push) ──&gt; ▼ 4. Remote Repository (GitHub/GitLab - Cloud Storage for Collaboration)
+      </div>
+
+      <p>
+        By coupling local Git repositories with <strong>GitHub</strong> (a
+        cloud-based hosting service for Git repositories), engineers can
+        collaborate asynchronously, manage feature branches, and integrate their
+        code into automated CI/CD (Continuous Integration/Continuous Deployment)
+        pipelines.
+      </p>
+    </section>
+
+    <section id="theory-semantic-web">
+      <h2>2. Theory: Semantic Web (and Legible Code History)</h2>
+      <p>
+        While Git manages the history of your files, the <em>quality</em> of
+        that history is dictated by how you write your code and your commits.
+        Here, the principles of the <strong>Semantic Web</strong> heavily
+        influence version control best practices.
+      </p>
+
+      <p>
+        When you use generic HTML elements like thousands of nested
+        <code>&lt;div&gt;</code> tags, the <code>git diff</code> (the visual
+        representation of what lines changed) becomes a nightmare for other
+        engineers to review during a Pull Request. If you change one
+        <code>&lt;div&gt;</code> in a sea of identical tags, context is lost.
+        However, if you modify an <code>&lt;article&gt;</code> inside a
+        <code>&lt;section id="enrollment"&gt;</code>, the Git diff instantly
+        communicates the structural and semantic impact of your change.
+      </p>
+
+      <h3>Semantic Commits (Conventional Commits)</h3>
+      <p>
+        Just as we use semantic HTML tags to give meaning to content, industry
+        professionals use <strong>Semantic Commit Messages</strong> to give
+        meaning to code history. A standard commit format looks like this:
+      </p>
+      <ul>
+        <li>
+          <code>feat:</code> Introduces a new feature to the codebase (e.g.,
+          <code>feat: add GitHub profile input to registration form</code>).
+        </li>
+        <li>
+          <code>fix:</code> Patches a bug (e.g.,
+          <code>fix: correct regex pattern for matriculation number</code>).
+        </li>
+        <li>
+          <code>docs:</code> Changes to documentation (e.g.,
+          <code>docs: update README with setup instructions</code>).
+        </li>
+        <li>
+          <code>refactor:</code> Code changes that neither fix a bug nor add a
+          feature, but improve structure.
+        </li>
+      </ul>
+    </section>
+
+    <section id="lab-environment-setup">
+      <h2>3. Lab: Environment Setup</h2>
+      <p>
+        To connect our local machine to the cloud, we must configure Git
+        globally and establish an authenticated link to GitHub.
+      </p>
+
+      <h3>Step-by-Step Configuration</h3>
+      <ol>
+        <li>
+          <strong>Verify Git Installation:</strong> Open your terminal and run
+          <code>git --version</code>.
+        </li>
+        <li>
+          <strong>Global Configuration:</strong> If you haven't already, bind
+          your identity to Git. These details are baked into every commit you
+          make.
+          <pre><code>git config --global user.name "Your Name"
+git config --global user.email "your.email@university.edu"</code></pre>
+        </li>
+        <li>
+          <strong>GitHub Account:</strong> Navigate to
+          <a href="https://github.com" target="_blank">github.com</a> and create
+          a free developer account if you do not have one.
+        </li>
+        <li>
+          <strong>Authentication:</strong> In modern workflows, VS Code
+          seamlessly handles GitHub authentication. When we execute our first
+          <code>git push</code>, VS Code will prompt you to log into GitHub via
+          your browser, securely generating an OAuth token for future terminal
+          commands.
+        </li>
+      </ol>
+    </section>
+
+    <section id="lab-guided-coding">
+      <h2>4. Lab: Guided Coding</h2>
+      <p>
+        We will now initialize our project, commit our work, simulate a
+        collaborative environment by creating a branch, intentionally cause a
+        merge conflict, resolve it, and push everything to GitHub.
+      </p>
+
+      <h3>Step 1: Local Initialization and First Commit</h3>
+      <p>Navigate to your CV/Form project directory in the terminal:</p>
+      <pre><code># Initialize the directory as a Git repository
+git init
+
+# Check the status of your files
+git status
+
+# Stage all files (the dot '.' means 'everything in this directory')
+git add .
+
+# Commit the files to the local repository
+git commit -m "feat: initialize project with semantic CV and enrollment form"</code></pre>
+
+      <h3>Step 2: Linking to GitHub</h3>
+      <ol>
+        <li>
+          Go to GitHub.com, log in, and click the
+          <strong>New Repository</strong> button.
+        </li>
+        <li>
+          Name it <code>practical-se-it-program</code>. Leave it Public.
+          <strong>Do not</strong> check "Add a README file" (we want an empty
+          repository to push our existing local code into).
+        </li>
+        <li>
+          Copy the URL provided by GitHub. Run the following commands in your
+          terminal:
+        </li>
+      </ol>
+      <pre><code># Rename the default branch from 'master' to 'main' (industry standard)
+git branch -M main
+
+# Link your local repository to the remote GitHub server
+git remote add origin https://github.com/YOUR_USERNAME/practical-se-it-program.git
+
+# Push your code to the cloud (-u sets the upstream link for future pushes)
+git push -u origin main</code></pre>
+
+      <h3>Step 3: Branching & Simulating a Merge Conflict</h3>
+      <p>
+        Merge conflicts occur when Git cannot automatically resolve differences
+        between two branches—usually because the exact same line of code was
+        edited differently in both branches. We will force this to happen so you
+        can learn how to fix it.
+      </p>
+
+      <pre><code># 1. Create and switch to a new development branch
+git checkout -b dev-branch</code></pre>
+
+      <p>
+        Open <code>index.html</code>. Find your <code>&lt;h1&gt;</code> tag and
+        change it to:
+        <code>&lt;h1&gt;IT Student Enrollment 2026&lt;/h1&gt;</code>. Save,
+        stage, and commit:
+      </p>
+      <pre><code>git add index.html
+git commit -m "refactor: update main heading in dev-branch"</code></pre>
+
+      <p>
+        Now, switch back to <code>main</code>.
+        <strong
+          >The HTML file will revert to its older state in your editor!</strong
+        >
+      </p>
+      <pre><code>git checkout main</code></pre>
+
+      <p>
+        While on <code>main</code>, change the exact same
+        <code>&lt;h1&gt;</code> tag to something else:
+        <code>&lt;h1&gt;Official University Enrollment&lt;/h1&gt;</code>. Save,
+        stage, and commit:
+      </p>
+      <pre><code>git add index.html
+git commit -m "refactor: update main heading directly in main branch"</code></pre>
+
+      <p>
+        Now, attempt to merge <code>dev-branch</code> into <code>main</code>:
+      </p>
+      <pre><code>git merge dev-branch</code></pre>
+      <p>
+        <strong>Terminal Output:</strong>
+        <code
+          >CONFLICT (content): Merge conflict in index.html. Automatic merge
+          failed; fix conflicts and then commit the result.</code
+        >
+      </p>
+
+      <h3>Step 4: Resolving the Conflict</h3>
+      <p>
+        Open <code>index.html</code> in VS Code. Git has injected conflict
+        markers into your code. It will look like this:
+      </p>
+        <pre>
+            <code>&lt;header&gt;
+                &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+                    &lt;h1&gt;Official University Enrollment&lt;/h1&gt;
+                =======
+                    &lt;h1&gt;IT Student Enrollment 2026&lt;/h1&gt;
+                &gt;&gt;&gt;&gt;&gt;&gt;&gt; dev-branch
+                &lt;/header&gt;
+            </code>
+        </pre>
+
+        <p>
+            To resolve this, you act as the human arbitrator. Delete the markers
+            (<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>, <code>=======</code>,
+            <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; dev-branch</code>) and keep the exact
+            code you want. Let's keep the <code>dev-branch</code> version.
+        </p>
+
+        <pre>
+            <code>&lt;header&gt;
+                &lt;h1&gt;IT Student Enrollment 2026&lt;/h1&gt;
+                &lt;/header&gt;
+            </code>
+        </pre>
+
+        <p>
+            Once edited and saved, finalize the merge by staging and committing the
+            resolved file:
+        </p>
+        <pre>
+            <code>git add index.html
+                git commit -m "Merge branch 'dev-branch' into main: resolve h1 conflict"
+                git push origin main
+            </code>
+        </pre>
+    </section>
+
+    <section id="debrief-homework">
+      <h2>5. Debrief and Homework</h2>
+      <p>
+        Today, you transformed your localized code into a resilient,
+        cloud-backed repository. You utilized Git's conceptual states (Working
+        Directory, Staging, Local Repo), linked to a remote GitHub repository,
+        and navigated the intimidating but entirely manageable process of
+        resolving a merge conflict. These operations form the absolute bedrock
+        of modern software collaboration.
+      </p>
+
+      <h3>Homework Assignments</h3>
+      <ol>
+        <li>
+          <strong>Branch Creation:</strong> Ensure you are on the
+          <code>main</code> branch. Create and switch to a brand new,
+          independent branch named <code>resources-page</code>.
+        </li>
+        <li>
+          <strong>Create & Code:</strong> Inside this new branch, create a file
+          named <code>resources.html</code>. Build a simple semantic HTML page
+          containing a list of web development resources (e.g., links to MDN,
+          Git documentation).
+        </li>
+        <li>
+          <strong>Link the Pages:</strong> Open your
+          <code>index.html</code> file and add a navigation link pointing to
+          <code>resources.html</code>.
+        </li>
+        <li>
+          <strong>Commit & Merge:</strong> Stage and commit both files to the
+          <code>resources-page</code> branch. Switch back to <code>main</code>,
+          merge the <code>resources-page</code> branch into <code>main</code>,
+          and finally <code>git push</code> the updated codebase to your remote
+          GitHub repository. Verify the files are visible on your GitHub
+          profile.
+        </li>
+      </ol>
+    </section>
+  </body>
+</html>

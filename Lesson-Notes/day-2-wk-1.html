@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 2, Week 1, Session 2: Advanced Forms, Validations & DOM Visualization</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background: #fdfdfd;
+            --text-color: #333;
+            --code-bg: #f4f6f8;
+            --border-color: #e1e4e8;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--background);
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+        header.textbook-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        h1, h2, h3, h4 {
+            color: var(--primary-color);
+            margin-top: 2.5rem;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { 
+            font-size: 1.8rem; 
+            border-bottom: 2px solid var(--border-color); 
+            padding-bottom: 0.5rem; 
+        }
+        p { margin-bottom: 1.2rem; }
+        ul, ol { margin-bottom: 1.5rem; padding-left: 2rem; }
+        li { margin-bottom: 0.5rem; }
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1.2rem;
+            overflow-x: auto;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.95rem;
+        }
+        .diagram-box {
+            border: 2px dashed #95a5a6;
+            background-color: #fafbfc;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-style: italic;
+            color: #555;
+            font-family: monospace;
+            white-space: pre;
+            text-align: left;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0; }
+    </style>
+</head>
+<body>
+
+    <header class="textbook-header">
+        <p><strong>PRACTICAL SOFTWARE ENGINEERING PROGRAM</strong></p>
+        <h1>Day 2, Week 1, Session 2</h1>
+        <p><em>Module: Advanced Forms, Validations & DOM Visualization</em></p>
+        <p><small>(Note: Version Control modules have been successfully deferred to Session 3 per updated curriculum flow.)</small></p>
+    </header>
+
+    <section id="theory-big-picture">
+        <h2>1. Theory: The Big Picture</h2>
+        <p>In Session 1, we learned how the browser requests a document from a server. Today, we focus on the inverse: how the user sends data <em>back</em> to the server. <strong>Web forms</strong> are the primary gateway for user input—handling everything from user authentication to complex data entry for industrial dashboards. Because user input is inherently unpredictable, data validation at the point of entry is critical for maintaining database integrity.</p>
+
+        <p>However, to truly master frontend engineering, you must understand how the browser interprets the HTML you write. When an HTML file is parsed, the browser constructs a hierarchical map in its memory called the <strong>Document Object Model (DOM)</strong>. The DOM represents the UI as a tree of interconnected nodes. Every form, input, and label is a branch or leaf on this tree. Later in this program, we will use JavaScript to programmatically target and manipulate these exact nodes to create dynamic, real-time applications.</p>
+
+        <div class="diagram-box">
+            [Textual Diagram: The DOM Tree Hierarchy]
+
+            Document
+            └── html (Root Node)
+                ├── head (Child of html, Sibling to body)
+                │    ├── title
+                │    └── meta
+                └── body (Child of html, Sibling to head)
+                    ├── header
+                    └── main
+                            └── form (Parent node to fieldset)
+                                └── fieldset (Child of form)
+                                    ├── legend (Sibling to input)
+                                    └── input (Sibling to legend)
+        </div>
+    </section>
+
+    <section id="theory-semantic-web">
+        <h2>2. Theory: Semantic Web (Advanced Validations & Nodes)</h2>
+        <p>HTML5 shifted the burden of basic form validation from custom JavaScript scripts to the browser itself. By using specific input types and attributes, we ensure accessibility and strict data formatting.</p>
+
+        <h3>Key Form Elements & Attributes</h3>
+        <ul>
+            <li><code>&lt;form&gt;</code>: The container for input elements. It typically requires an <code>action</code> (the URL the data is sent to) and a <code>method</code> (usually GET or POST).</li>
+            <li><code>&lt;fieldset&gt;</code> &amp; <code>&lt;legend&gt;</code>: Groups related inputs (e.g., separating "Personal Info" from "Account Details") and provides a semantic caption, highly beneficial for screen readers.</li>
+            <li><code>&lt;label&gt;</code>: Connects a text description to a specific input via the <code>for</code> attribute, which must match the input's <code>id</code>. Clicking the label focuses the input.</li>
+            <li><strong>Input Types:</strong> HTML5 provides semantic types like <code>type="email"</code>, <code>type="tel"</code>, and <code>type="date"</code>, which automatically trigger appropriate mobile keyboards and built-in validation formatting.</li>
+            <li><strong>Validation Attributes:</strong> Attributes such as <code>required</code>, <code>minlength</code>, <code>maxlength</code>, and <code>pattern</code> (Regex) enforce strict data rules at the DOM level[cite: 1].</li>
+        </ul>
+
+        <div class="note">
+            <strong>Industry Relevance:</strong> Never trust user input. While frontend HTML5 validation vastly improves the user experience by providing immediate feedback, it is easily bypassed. It must <em>always</em> be paired with strict backend validation (which we will cover in Week 8 using Pydantic).
+        </div>
+        
+        <h3>Advanced Input Types</h3>
+        <ul>
+            <li><code>type="date"</code>: Invokes a native calendar date-picker. Highly consistent and mobile-friendly.</li>
+            <li><code>type="checkbox"</code>: Used for boolean (true/false) selections. Multiple checkboxes can be selected in a group.</li>
+            <li><code>type="radio"</code>: Used for mutually exclusive selections. Grouped by sharing the exact same <code>name</code> attribute.</li>
+            <li><code>&lt;select&gt;</code> and <code>&lt;option&gt;</code>: Creates a dropdown menu for restricted choice lists.</li>
+        </ul>
+
+        <h3>Built-in Validation Attributes</h3>
+        <ul>
+            <li><code>required</code>: Prevents form submission if the field is empty.</li>
+            <li><code>min</code> and <code>max</code>: Defines numerical boundaries for number and date inputs.</li>
+            <li><code>pattern</code>: Accepts a Regular Expression (Regex) to enforce strict formatting (e.g., ensuring a student ID matches a specific alphanumeric format).</li>
+        </ul>
+
+        <div class="note">
+            <strong>DOM Relationship Lexicon:</strong> In DOM terminology, a node directly inside another is its <strong>Child</strong>. The container is the <strong>Parent</strong>. Nodes sharing the exact same parent are <strong>Siblings</strong>. When visualizing your forms, always map out these parent-child-sibling relationships.
+        </div>
+    </section>
+
+    <section id="lab-environment-setup">
+        <h2>3. Lab: Environment Setup</h2>
+        <p>Today, our environment setup focuses on browser diagnostic tooling rather than text editor extensions. We will utilize Google Chrome's Developer Tools to actively inspect the DOM tree generated by our HTML.</p>
+
+        <h3>DOM Inspector Configuration</h3>
+        <ol>
+            <li><strong>Launch Live Server:</strong> Open your VS Code workspace (e.g., <code>week1-session2</code>) and start Live Server on an empty <code>index.html</code> file.</li>
+            <li><strong>Open Developer Tools:</strong> In Google Chrome (or Edge/Brave), right-click anywhere on the blank page and select <strong>Inspect</strong> (or press <code>Ctrl+Shift+I</code> / <code>Cmd+Option+I</code>).</li>
+            <li><strong>Navigate to the Elements Tab:</strong> This tab displays the live DOM tree. It is <em>not</em> just your source code; it is the browser's active, hierarchical interpretation of your code. As we build our form, keep this panel open to observe how parent and child nodes nest within each other.</li>
+        </ol>
+    </section>
+
+    <section id="lab-guided-coding">
+        <h2>4. Lab: Guided Coding</h2>
+        <p>We will construct a comprehensive Student Enrollment Form. This form will feature advanced input types, strict DOM-level validations, and deep hierarchical nesting.</p>
+
+        <p>Write the following code into your <code>index.html</code> file:</p>
+
+        <pre>
+            <code>
+                &lt;!DOCTYPE html&gt;
+                &lt;html lang="en"&gt;
+                &lt;head&gt;
+                    &lt;meta charset="UTF-8"&gt;
+                    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+                    &lt;title&gt;Student Enrollment Form &amp; DOM Mapping&lt;/title&gt;
+                &lt;/head&gt;
+                &lt;body&gt;
+
+                    &lt;header&gt;
+                        &lt;h1&gt;Software Engineering IT Enrollment&lt;/h1&gt;
+                    &lt;/header&gt;
+
+                    &lt;main&gt;
+                        &lt;!-- Action represents the backend API route; Method dictates the HTTP verb --&gt;
+                        &lt;form action="/api/enrollment" method="POST"&gt;
+                            
+                            &lt;!-- Parent Node 1: Personal Details Fieldset --&gt;
+                            &lt;fieldset&gt;
+                                &lt;legend&gt;Trainee Identity&lt;/legend&gt;
+                                
+                                &lt;div&gt;
+                                    &lt;label for="matricNumber"&gt;University Matriculation No:&lt;/label&gt;
+                                    &lt;!-- Pattern enforces 2 letters followed by 6 digits --&gt;
+                                    &lt;input type="text" id="matricNumber" name="matricNumber" pattern="[A-Za-z]{2}\d{6}" title="Example: CS123456" required&gt;
+                                &lt;/div&gt;
+
+                                &lt;div&gt;
+                                    &lt;label for="dob"&gt;Date of Birth:&lt;/label&gt;
+                                    &lt;!-- max restricts dates to past dates for validity --&gt;
+                                    &lt;input type="date" id="dob" name="dob" max="2010-01-01" required&gt;
+                                &lt;/div&gt;
+                            &lt;/fieldset&gt;
+
+                            &lt;!-- Parent Node 2: Technical Background Fieldset --&gt;
+                            &lt;fieldset&gt;
+                                &lt;legend&gt;Curriculum Preferences&lt;/legend&gt;
+                                
+                                &lt;div&gt;
+                                    &lt;label for="track"&gt;Primary Track:&lt;/label&gt;
+                                    &lt;!-- Select Dropdown Node --&gt;
+                                    &lt;select id="track" name="track" required&gt;
+                                        &lt;option value="" disabled selected&gt;Select Track...&lt;/option&gt;
+                                        &lt;option value="frontend"&gt;Frontend Engineering&lt;/option&gt;
+                                        &lt;option value="backend"&gt;Backend Architecture&lt;/option&gt;
+                                        &lt;option value="fullstack"&gt;Full-Stack Development&lt;/option&gt;
+                                    &lt;/select&gt;
+                                &lt;/div&gt;
+
+                                &lt;div&gt;
+                                    &lt;p&gt;Programming Languages Known:&lt;/p&gt;
+                                    &lt;!-- Checkbox Sibling Nodes --&gt;
+                                    &lt;label&gt;
+                                        &lt;input type="checkbox" name="languages" value="python"&gt; Python
+                                    &lt;/label&gt;
+                                    &lt;label&gt;
+                                        &lt;input type="checkbox" name="languages" value="javascript"&gt; JavaScript
+                                    &lt;/label&gt;
+                                    &lt;label&gt;
+                                        &lt;input type="checkbox" name="languages" value="c"&gt; C/C++
+                                    &lt;/label&gt;
+                                &lt;/div&gt;
+                            &lt;/fieldset&gt;
+
+                            &lt;!-- Submit Button --&gt;
+                            &lt;button type="submit"&gt;Finalize Enrollment&lt;/button&gt;
+                            
+                        &lt;/form&gt;
+                    &lt;/main&gt;
+
+                &lt;/body&gt;
+                &lt;/html&gt;
+            </code>
+        </pre>
+
+        <h3>Debugging and Workflow Notes</h3>
+        <p>Attempt to submit the form under various failing conditions. Enter a Matriculation Number that does not match the Regex pattern (e.g., "123ABC") and observe the native browser popup blocking the submission. Select a date of birth in the year 2025 and notice how the <code>max="2010-01-01"</code> attribute prevents it. This immediate feedback loop is the power of HTML5 validation.</p>
+    </section>
+
+    <section id="debrief-homework">
+        <h2>5. Debrief and Homework</h2>
+        <p>Today, we engineered a highly complex, accessible form utilizing modern input types and built-in validation triggers. More importantly, we began visualizing our code not just as text, but as a hierarchical DOM tree—a fundamental shift in thinking that will prepare you for JavaScript DOM manipulation in Week 6.</p>
+        
+        <h3>Homework Assignments</h3>
+        <ol>
+            <li><strong>DOM Tree Mapping:</strong> Using a digital drawing tool (like Excalidraw, Miro, or draw.io) or a piece of paper, map out the visual DOM hierarchy tree for the Student Enrollment form we just built. Draw boxes for every element starting from the <code>&lt;form&gt;</code> tag down to the deepest <code>&lt;input&gt;</code> tag. Explicitly label the lines connecting them as "Parent", "Child", or "Sibling".</li>
+            <li><strong>Practical Extension:</strong> Add a set of <strong>Radio Buttons</strong> to the Technical Background fieldset asking the user to select their preferred operating system (Windows, macOS, or Linux). Ensure they share the exact same <code>name</code> attribute so that only one can be selected at a time.</li>
+        </ol>
+    </section>
+
+</body>
+</html>
