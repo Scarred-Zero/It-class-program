@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 1, Week 2, Session 4: Selectors, Specificity & Cascade</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e67e22;
+            --background: #fdfdfd;
+            --text-color: #333;
+            --code-bg: #f4f6f8;
+            --border-color: #e1e4e8;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--background);
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+        header.textbook-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        .capstone-banner {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        h1, h2, h3, h4 {
+            color: var(--primary-color);
+            margin-top: 2.5rem;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { 
+            font-size: 1.8rem; 
+            border-bottom: 2px solid var(--border-color); 
+            padding-bottom: 0.5rem; 
+        }
+        p { margin-bottom: 1.2rem; }
+        ul, ol { margin-bottom: 1.5rem; padding-left: 2rem; }
+        li { margin-bottom: 0.5rem; }
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1.2rem;
+            overflow-x: auto;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.95rem;
+        }
+        .diagram-box {
+            border: 2px dashed #95a5a6;
+            background-color: #fafbfc;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-style: italic;
+            color: #555;
+            font-family: monospace;
+            white-space: pre;
+            text-align: left;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0; }
+    </style>
+</head>
+<body>
+
+    <header class="textbook-header">
+        <p><strong>PRACTICAL SOFTWARE ENGINEERING PROGRAM</strong></p>
+        <h1>Day 1, Week 2, Session 4</h1>
+        <p><em>Module: Selectors, Specificity & Cascade</em></p>
+        <div class="capstone-banner">Capstone Track: Agile Task Board (Kanban-Style)</div>
+    </header>
+
+    <section id="theory-big-picture">
+        <h2>1. Theory: The Big Picture</h2>
+        <p>Throughout Week 1, we constructed robust, structural documents using semantic HTML5. However, raw HTML is strictly structural. To transform a raw document into a professional interface—such as the Agile Task Board (Kanban-Style) you have chosen for your Capstone[cite: 1]—we must introduce a new language: <strong>Cascading Style Sheets (CSS3)</strong>.</p>
+
+        <p>CSS is based on a foundational software engineering principle: <strong>Separation of Concerns</strong>. HTML handles the <em>data and structure</em>, while CSS handles the <em>presentation and layout</em>. The primary mechanism CSS uses to apply styles is the <strong>CSS Rule</strong>, which dictates exactly how the browser's rendering engine should paint the DOM tree onto the screen[cite: 1].</p>
+
+        <div class="diagram-box">
+[Textual Diagram: Anatomy of a CSS Rule]
+
+selector {
+    property: value;  /* This is a declaration */
+    property: value;
+}
+
+h1 {
+    color: red;
+    font-size: 2rem;
+}
+        </div>
+
+        <p>Because multiple CSS rules might target the exact same HTML element, the browser needs a conflict-resolution system. This system is known as <strong>The Cascade</strong>[cite: 1]. The Cascade determines which styles "win" based on three factors: Source Order (code written further down overrides code above it), Importance (the <code>!important</code> flag), and most crucially, <strong>Specificity</strong>[cite: 1].</p>
+    </section>
+
+    <section id="theory-semantic-web">
+        <h2>2. Theory: Semantic Web (Selectors & Specificity Calculation)</h2>
+        <p>In a large application like our future Agile Task Board, which involves dynamic DOM manipulation and real-time client-state updates[cite: 1], you will have hundreds of UI elements. Writing targeted, performant CSS requires mastering <strong>Modern CSS Selectors</strong> and the mathematical <strong>Specificity Calculation</strong>[cite: 1].</p>
+
+        <h3>Modern CSS Selectors</h3>
+        <ul>
+            <li><strong>Element Selector (<code>h1</code>, <code>p</code>, <code>article</code>):</strong> Targets all instances of a specific HTML tag.</li>
+            <li><strong>Class Selector (<code>.task-card</code>):</strong> Targets any element containing the specified class attribute. This is the workhorse of modern web development.</li>
+            <li><strong>ID Selector (<code>#main-nav</code>):</strong> Targets a single, unique element. ID selectors are extremely powerful but should be used sparingly due to their high specificity.</li>
+            <li><strong>Descendant Selector (<code>.column .task-card</code>):</strong> Targets elements nested inside other elements.</li>
+        </ul>
+
+        <h3>Specificity Calculation Engine</h3>
+        <p>Specificity is calculated via a four-tier point system: <strong>(Inline Styles, IDs, Classes/Pseudo-classes, Elements)</strong>[cite: 1].</p>
+        <div class="diagram-box">
+[Textual Diagram: Specificity Scoring]
+
+Selector:                    Score (Inline, ID, Class, Element)
+---------------------------------------------------------------
+h1                           (0, 0, 0, 1)  = 1
+.header-title                (0, 0, 1, 0)  = 10
+nav ul li a                  (0, 0, 0, 4)  = 4
+#user-profile                (0, 1, 0, 0)  = 100
+.board .column .card h3      (0, 0, 3, 1)  = 31
+        </div>
+        <p>If two rules conflict, the browser compares their specificity scores. A score of <code>100</code> (an ID) will always override a score of <code>31</code> (classes and elements). This is why engineers prefer using <strong>Class Selectors</strong>—they keep specificity low enough to be easily overridden when the state changes (e.g., when a task moves from "Pending" to "Completed").</p>
+        
+        <p>Finally, consider <strong>Inheritance</strong>[cite: 1]. Some CSS properties naturally flow down the DOM tree. If you set <code>font-family</code> on the <code>&lt;body&gt;</code>, all children inherit it. However, layout properties like <code>border</code> and <code>margin</code> do <em>not</em> inherit, preventing layout chaos.</p>
+    </section>
+
+    <section id="lab-environment-setup">
+        <h2>3. Lab: Environment Setup</h2>
+        <p>To keep our concerns separated, we will not write CSS inside our HTML files. We will create an external stylesheet and link it to our document.</p>
+
+        <h3>Step-by-Step Configuration</h3>
+        <ol>
+            <li><strong>Workspace Preparation:</strong> Open your CV project repository from Week 1 in VS Code.</li>
+            <li><strong>Create the CSS File:</strong> In the root directory, alongside <code>index.html</code>, create a new file named <code>styles.css</code>.</li>
+            <li><strong>Link the Stylesheet:</strong> Open your <code>index.html</code> file. Inside the <code>&lt;head&gt;</code> tag, add the following link element to bind the HTML document to the CSS rule engine:
+<pre><code>&lt;!-- Binds external CSS to the HTML document --&gt;
+&lt;link rel="stylesheet" href="styles.css"&gt;</code></pre>
+            </li>
+            <li><strong>Verify Connection:</strong> Open <code>styles.css</code> and write a temporary rule: <code>body { background-color: red; }</code>. Start your Live Server. If the screen turns red, the linkage is successful. Delete the temporary rule.</li>
+        </ol>
+    </section>
+
+    <section id="lab-guided-coding">
+        <h2>4. Lab: Guided Coding</h2>
+        <p>We will now style the semantic CV document constructed in Week 1, configuring clean navigation headers and establishing professional typography[cite: 1].</p>
+
+        <h3>Step 1: The CSS Reset & Body Typography</h3>
+        <p>Different browsers apply different default margins and paddings. A "CSS Reset" nullifies these defaults, giving us a blank canvas.</p>
+        <p>Write the following in your <code>styles.css</code>:</p>
+
+<pre><code>/* 1. CSS Reset & Base Inheritance */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Includes padding and borders in the element's total width */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333333;
+    background-color: #f4f7f6;
+    padding: 20px;
+}</code></pre>
+
+        <h3>Step 2: Styling the Navigation Header</h3>
+        <p>We will use element and descendant selectors to style the header and its internal list navigation[cite: 1]. Notice how we strip the default bullet points from the <code>&lt;ul&gt;</code>.</p>
+
+<pre><code>/* 2. Header and Navigation Typography */
+header {
+    background-color: #2c3e50;
+    color: #ffffff;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    font-style: italic;
+    color: #bdc3c7;
+}
+
+/* Descendant selector: targets ul only inside nav */
+nav ul {
+    list-style-type: none; /* Removes bullet points */
+    margin-top: 1rem;
+}
+
+nav ul li {
+    display: inline-block; /* Aligns links horizontally */
+    margin: 0 15px;
+}
+
+/* Pseudo-class selector: :hover */
+nav ul li a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: #ecf0f1; /* Changes color on mouse hover */
+}</code></pre>
+
+        <h3>Step 3: Section and Article Formatting</h3>
+        <p>Finally, we style the semantic sections and articles. We will add a class to our HTML to demonstrate class selector specificity.</p>
+
+        <p><em>In your <code>index.html</code>, add a class to the Experience article: <code>&lt;article class="cv-card"&gt;</code>. Then apply the following CSS:</em></p>
+
+<pre><code>/* 3. Section and Class Styling */
+section {
+    background-color: #ffffff;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Adds a subtle drop shadow */
+}
+
+section h2 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Class selector: Specificity of 10 */
+.cv-card {
+    border-left: 4px solid #3498db;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}</code></pre>
+
+        <div class="note">
+            <strong>Debugging Tip:</strong> If a style isn't applying, use Chrome Developer Tools (Inspect). Look at the "Styles" tab for the element. If your rule has a line struck through it, it means another rule with higher specificity (or appearing later in the cascade) is overriding it.
+        </div>
+    </section>
+
+    <section id="classwork">
+        <h2>5. Classwork</h2>
+        <p>Since your Capstone revolves around an Agile Task Board, managing state via CSS classes is essential. Your task is to apply styles to a "Kanban Task Card" based on specificity rules.</p>
+        
+        <p><strong>The HTML Structure:</strong></p>
+<pre><code>&lt;article class="task-card urgent"&gt;
+    &lt;h3&gt;Setup Database Schema&lt;/h3&gt;
+    &lt;p&gt;Configure PostgreSQL tables for users and tasks.&lt;/p&gt;
+&lt;/article&gt;</code></pre>
+
+        <p><strong>The Task:</strong></p>
+        <ol>
+            <li>Write a base CSS rule for the <code>.task-card</code> class that gives it a white background, black text, <code>15px</code> padding, and a standard gray border.</li>
+            <li>Write a chained class selector (<code>.task-card.urgent</code>) that increases the specificity. For this rule, change the background color to a light red, and the border to a bold, solid red. This proves that the <code>.urgent</code> state overrides the base state due to higher specificity calculation (score: 20 vs 10).</li>
+        </ol>
+        
+        <p><em>Execute this in your <code>styles.css</code> and preview it in Live Server to verify the override logic.</em></p>
+    </section>
+
+    <section id="debrief-homework">
+        <h2>6. Debrief and Homework</h2>
+        <p>Today marks your transition from raw data structure (HTML) to visual interface engineering (CSS). You learned the anatomy of a CSS rule, how the Cascade resolves conflicts, and how the browser mathematically calculates Specificity[cite: 1] to determine visual output. By styling your CV, you practiced applying these rules to a live document, separating concerns seamlessly.</p>
+        
+        <h3>Homework Assignment</h3>
+        <p><strong>Write a styled CSS-only landing page header section[cite: 1].</strong></p>
+        <ol>
+            <li>Create a new HTML file named <code>landing.html</code> and a new CSS file named <code>landing-styles.css</code>.</li>
+            <li>Keeping your Capstone in mind, design the "Hero Header" section for your Agile Task Board application.</li>
+            <li>The HTML must contain a <code>&lt;header&gt;</code>, a primary <code>&lt;h1&gt;</code> (e.g., "Manage Your SDLC Workflows"), a supportive <code>&lt;p&gt;</code>, and two "Call to Action" buttons (using <code>&lt;a&gt;</code> tags formatted to look like buttons).</li>
+            <li>Apply CSS to center the content, use engaging typography, apply distinct background colors, and utilize the <code>:hover</code> pseudo-class to make the buttons interactive.</li>
+        </ol>
+    </section>
+
+</body>
+</html>
