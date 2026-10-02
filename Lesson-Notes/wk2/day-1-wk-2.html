@@ -107,17 +107,17 @@
         <p>CSS is based on a foundational software engineering principle: <strong>Separation of Concerns</strong>. HTML handles the <em>data and structure</em>, while CSS handles the <em>presentation and layout</em>. The primary mechanism CSS uses to apply styles is the <strong>CSS Rule</strong>, which dictates exactly how the browser's rendering engine should paint the DOM tree onto the screen[cite: 1].</p>
 
         <div class="diagram-box">
-[Textual Diagram: Anatomy of a CSS Rule]
+            [Textual Diagram: Anatomy of a CSS Rule]
 
-selector {
-    property: value;  /* This is a declaration */
-    property: value;
-}
+            selector {
+                property: value;  /* This is a declaration */
+                property: value;
+            }
 
-h1 {
-    color: red;
-    font-size: 2rem;
-}
+            h1 {
+                color: red;
+                font-size: 2rem;
+            }
         </div>
 
         <p>Because multiple CSS rules might target the exact same HTML element, the browser needs a conflict-resolution system. This system is known as <strong>The Cascade</strong>[cite: 1]. The Cascade determines which styles "win" based on three factors: Source Order (code written further down overrides code above it), Importance (the <code>!important</code> flag), and most crucially, <strong>Specificity</strong>[cite: 1].</p>

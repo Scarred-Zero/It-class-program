@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Day 2, Week 2, Session 5: The Box Model Mastery</title>
+        <style>
+            :root {
+                --primary-color: #2c3e50;
+                --secondary-color: #3498db;
+                --accent-color: #e67e22;
+                --background: #fdfdfd;
+                --text-color: #333;
+                --code-bg: #f4f6f8;
+                --border-color: #e1e4e8;
+            }
+            body {
+                font-family:
+                    "Segoe UI",
+                    system-ui,
+                    -apple-system,
+                    sans-serif;
+                line-height: 1.7;
+                color: var(--text-color);
+                background-color: var(--background);
+                max-width: 960px;
+                margin: 0 auto;
+                padding: 2rem 2rem 5rem 2rem;
+            }
+            header.textbook-header {
+                text-align: center;
+                margin-bottom: 3rem;
+                padding-bottom: 2rem;
+                border-bottom: 3px solid var(--primary-color);
+            }
+            .capstone-banner {
+                background-color: var(--accent-color);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 4px;
+                font-weight: bold;
+                display: inline-block;
+                margin-top: 1rem;
+            }
+            h1,
+            h2,
+            h3,
+            h4 {
+                color: var(--primary-color);
+                margin-top: 2.5rem;
+            }
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+            h2 {
+                font-size: 1.8rem;
+                border-bottom: 2px solid var(--border-color);
+                padding-bottom: 0.5rem;
+            }
+            p {
+                margin-bottom: 1.2rem;
+            }
+            ul,
+            ol {
+                margin-bottom: 1.5rem;
+                padding-left: 2rem;
+            }
+            li {
+                margin-bottom: 0.5rem;
+            }
+            pre {
+                background-color: var(--code-bg);
+                border: 1px solid var(--border-color);
+                border-left: 4px solid var(--secondary-color);
+                padding: 1.2rem;
+                overflow-x: auto;
+                border-radius: 4px;
+                font-family: "Fira Code", "Courier New", Courier, monospace;
+                font-size: 0.95rem;
+                line-height: 1.5;
+            }
+            code {
+                font-family: "Fira Code", "Courier New", Courier, monospace;
+                background-color: var(--code-bg);
+                padding: 0.2rem 0.4rem;
+                border-radius: 3px;
+                font-size: 0.95rem;
+            }
+            .diagram-box {
+                border: 2px dashed #95a5a6;
+                background-color: #fafbfc;
+                padding: 1.5rem;
+                margin: 1.5rem 0;
+                text-align: center;
+                font-style: italic;
+                color: #555;
+                font-family: monospace;
+                white-space: pre;
+                text-align: left;
+            }
+            .note {
+                background-color: #e8f4f8;
+                border-left: 4px solid var(--secondary-color);
+                padding: 1rem 1.5rem;
+                margin: 1.5rem 0;
+                border-radius: 0 4px 4px 0;
+            }
+            hr {
+                border: 0;
+                border-top: 1px solid var(--border-color);
+                margin: 3rem 0;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="textbook-header">
+            <p><strong>PRACTICAL SOFTWARE ENGINEERING PROGRAM</strong></p>
+            <h1>Day 2, Week 2, Session 5</h1>
+            <p><em>Module: The Box Model Mastery</em></p>
+            <div class="capstone-banner">
+                Capstone Track: Agile Task Board (Kanban-Style)
+            </div>
+        </header>
+
+        <section id="theory-big-picture">
+            <h2>1. Theory: The Big Picture</h2>
+            <p>
+                Before we can master complex layout systems like CSS Grid or
+                Flexbox, we must confront the most fundamental law of web
+                design:
+                <strong>Everything is a box.</strong> No matter if an HTML
+                element looks circular, triangular, or like a standard paragraph
+                of text, the browser's rendering engine calculates its physical
+                footprint on the screen as a strict rectangle. This paradigm is
+                known as the <strong>CSS Box Model</strong>.
+            </p>
+
+            <p>
+                When engineering an interface like an Agile Kanban Board,
+                precision is everything. If the space between your "To Do"
+                column and your "In Progress" column is calculated incorrectly,
+                the entire UI breaks, forcing elements onto new lines. The Box
+                Model consists of four concentric layers:
+            </p>
+
+            <div class="diagram-box">
+                [Textual Diagram: The CSS Box Model]
+                +---------------------------------------------------+ | MARGIN |
+                | (Transparent outer space. Pushes other boxes away) | |
+                +---------------------------------------------+ | | | BORDER | |
+                | | (The visible wall defining the box edge) | | | |
+                +---------------------------------------+ | | | | | PADDING | |
+                | | | | (Inner space. Pushes content inward) | | | | | |
+                +---------------------------------+ | | | | | | | CONTENT | | |
+                | | | | | (Text, Images, nested divs) | | | | | | |
+                +---------------------------------+ | | | | |
+                +---------------------------------------+ | | |
+                +---------------------------------------------+ |
+                +---------------------------------------------------+
+            </div>
+        </section>
+
+        <section id="theory-semantic-web">
+            <h2>2. Theory: Semantic Web (Box-Sizing & Units)</h2>
+            <p>
+                Historically, the CSS Box Model caused immense frustration. By
+                default (<code>box-sizing: content-box</code>), if you set a box
+                width to <code>300px</code>, and then added <code>20px</code> of
+                padding and a <code>2px</code> border, the browser would add
+                those values <em>on top</em> of the 300px, making the total
+                width <code>344px</code>. This broke layouts constantly.
+            </p>
+
+            <p>
+                Modern engineering relies on a crucial reset:
+                <strong><code>box-sizing: border-box</code></strong
+                >. This forces the browser to include padding and borders
+                <em>inside</em> the declared width. If you say a box is 300px
+                wide, it stays exactly 300px wide, and the inner content shrinks
+                to accommodate the padding.
+            </p>
+
+            <h3>Modern Dimension Units</h3>
+            <ul>
+                <li>
+                    <strong>Pixels (<code>px</code>):</strong> Absolute units
+                    based on screen pixels. Excellent for precise things like
+                    borders or shadows, but poor for responsive typography.
+                </li>
+                <li>
+                    <strong>Percentages (<code>%</code>):</strong> Relative to
+                    the parent container. A column set to
+                    <code>width: 30%</code> will always take up 30% of its
+                    parent's width, regardless of screen size.
+                </li>
+                <li>
+                    <strong>Root EM (<code>rem</code>):</strong> Relative to the
+                    root (<code>&lt;html&gt;</code>) font size (usually 16px).
+                    If you set padding to <code>1rem</code>, it equals 16px. If
+                    a visually impaired user increases their browser font size
+                    to 24px, your <code>1rem</code> padding automatically scales
+                    to 24px.
+                    <em
+                        >Always use <code>rem</code> for typography and spatial
+                        padding for maximum accessibility.</em
+                    >
+                </li>
+            </ul>
+        </section>
+
+        <section id="lab-environment-setup">
+            <h2>
+                3. Lab: Environment Setup & Retrospective Capstone Bootstrapping
+            </h2>
+            <p>
+                Because we are now officially adopting a hybrid Capstone-driven
+                approach, we need to restructure our workspace to focus
+                exclusively on the <strong>Agile Task Board</strong>. Let's
+                perform a one-time project baseline setup.
+            </p>
+
+            <h3>Retrospective Capstone Setup (Do this first)</h3>
+            <ol>
+                <li>
+                    <strong>Create Project Folder:</strong> Create a new
+                    directory named <code>agile-task-board</code> and open it in
+                    VS Code.
+                </li>
+                <li>
+                    <strong>Git Initialization:</strong> Run
+                    <code>git init</code>.
+                </li>
+                <li>
+                    <strong>File Scaffolding:</strong> Create the following
+                    files in the root directory:
+                    <ul>
+                        <li>
+                            <code>index.html</code> (Our main Kanban interface)
+                        </li>
+                        <li><code>styles.css</code> (Our stylesheet)</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h3>Current Session Setup</h3>
+            <ol>
+                <li>
+                    <strong>Git Branch:</strong> Run
+                    <code>git checkout -b feature/box-model</code> to track
+                    today's work.
+                </li>
+                <li>
+                    <strong>HTML Skeleton:</strong> Open
+                    <code>index.html</code> and generate your HTML5 boilerplate
+                    (type <code>!</code> and hit Tab). Link your CSS file in the
+                    <code>&lt;head&gt;</code>:
+                    <code>&lt;link rel="stylesheet" href="styles.css"&gt;</code
+                    >.
+                </li>
+                <li>
+                    <strong>Launch:</strong> Start your VS Code Live Server.
+                </li>
+            </ol>
+        </section>
+
+        <section id="lab-guided-coding">
+            <h2>4. Lab: Guided Coding (Building the Kanban Interface)</h2>
+            <p>
+                We will construct one column of our Agile Task Board and
+                populate it with task cards to observe how Margin, Border, and
+                Padding interact in a real component.
+            </p>
+
+            <h3>Step 1: The HTML Structure</h3>
+            <p>
+                Add the following semantic markup to the
+                <code>&lt;body&gt;</code> of your <code>index.html</code>:
+            </p>
+
+            <pre>
+                <code>&lt;!-- Main Application Container --&gt;
+                    &lt;main class="kanban-board"&gt;
+                        
+                        &lt;!-- A Single Kanban Column --&gt;
+                        &lt;section class="kanban-column"&gt;
+                            &lt;header class="column-header"&gt;
+                                &lt;h2&gt;To Do&lt;/h2&gt;
+                            &lt;/header&gt;
+
+                            &lt;!-- Task Card 1 --&gt;
+                            &lt;article class="task-card"&gt;
+                                &lt;h3&gt;Setup Database Schema&lt;/h3&gt;
+                                &lt;p&gt;Design PostgreSQL tables for Users and Tasks.&lt;/p&gt;
+                            &lt;/article&gt;
+
+                            &lt;!-- Task Card 2 --&gt;
+                            &lt;article class="task-card"&gt;
+                                &lt;h3&gt;Configure FastAPI Routing&lt;/h3&gt;
+                                &lt;p&gt;Set up base REST endpoints for the task model.&lt;/p&gt;
+                            &lt;/article&gt;
+                            
+                        &lt;/section&gt;
+
+                    &lt;/main&gt;
+                </code>
+            </pre>
+
+            <h3>Step 2: The CSS Reset & Base Sizing</h3>
+            <p>
+                Open <code>styles.css</code>. We must apply our global
+                <code>box-sizing</code> reset.
+            </p>
+
+            <pre>
+                <code>/* 1. Universal Reset & Box Model Fix */
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box; 
+                    }
+
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background-color: #ebecf0; /* Standard light-gray board background */
+                        padding: 2rem; /* Pushes the entire board away from the screen edges */
+                    }
+                </code>
+            </pre>
+
+            <h3>Step 3: Styling the Column (Padding vs. Margin)</h3>
+            <p>
+                Now, we style the column. Notice how we use
+                <strong>padding</strong> to keep the cards away from the
+                column's edges, but we will eventually use
+                <strong>margin</strong> to push multiple columns away from each
+                other.
+            </p>
+
+            <pre>
+                <code>/* 2. Kanban Column Styling */
+                    .kanban-column {
+                        background-color: #f4f5f7;
+                        width: 350px; /* Fixed width for now */
+                        border-radius: 8px; /* Rounded corners */
+                        
+                        /* PADDING: Inner space. Pushes the header and cards away from the grey edge */
+                        padding: 1rem; 
+                        
+                        /* BORDER: A subtle structural outline */
+                        border: 1px solid #dfe1e6;
+                    }
+
+                    .column-header h2 {
+                        font-size: 1.2rem;
+                        color: #172b4d;
+                        
+                        /* MARGIN: Pushes the first task card down, creating breathing room */
+                        margin-bottom: 1rem; 
+                    }
+                </code>
+            </pre>
+
+            <h3>Step 4: Styling the Task Cards</h3>
+            <p>
+                Task cards are classic examples of the Box Model in action. We
+                need them to look like distinct, clickable objects.
+            </p>
+
+            <pre>
+                <code>/* 3. Task Card Styling */
+                    .task-card {
+                        background-color: #ffffff;
+                        border-radius: 4px;
+                        
+                        /* BORDER: Creates the physical card edge */
+                    border: 1px solid #dfe1e6;
+                    
+                    /* PADDING: Gives the text room to breathe inside the white card */
+                    padding: 1rem; 
+                    
+                    /* MARGIN: Pushes the next card down so they don't touch */
+                    margin-bottom: 0.8rem; 
+                    
+                    /* Optional: A subtle shadow for depth */
+                    box-shadow: 0 1px 2px rgba(9, 30, 66, 0.25);
+                    }
+
+                    .task-card h3 {
+                        font-size: 1rem;
+                        color: #172b4d;
+                        margin-bottom: 0.5rem; /* Separates title from description */
+                    }
+
+                    .task-card p {
+                        font-size: 0.85rem;
+                        color: #5e6c84;
+                    }
+                </code>
+            </pre>
+            <div class="note">
+                <strong>Developer Tooling:</strong> Open Chrome DevTools,
+                inspect a <code>.task-card</code>, and scroll to the bottom of
+                the "Styles" pane. You will see a visual, color-coded diagram of
+                the exact Box Model (Margin, Border, Padding, Content) computed
+                for that specific element.
+            </div>
+        </section>
+
+        <section id="classwork">
+            <h2>5. Classwork</h2>
+            <p>
+                Every Agile board relies on visual indicators like "Tags" or
+                "Labels" (e.g., a red tag for "Bug", blue for "Feature"). Your
+                task is to build a tag using strict Box Model rules.
+            </p>
+
+            <p>
+                <strong>Step 1:</strong> Update the HTML for "Task Card 1" by
+                adding a span element above the <code>&lt;h3&gt;</code>: <br />
+                <code>&lt;span class="task-tag"&gt;Backend&lt;/span&gt;</code>
+            </p>
+
+            <p>
+                <strong>Step 2:</strong> In your <code>styles.css</code>, write
+                the rule for <code>.task-tag</code> using the following
+                constraints:
+            </p>
+            <ul>
+                <li>
+                    Display it as <code>inline-block</code> (so margins/paddings
+                    apply correctly without breaking to a new line).
+                </li>
+                <li>
+                    Give it a background color of <code>#0052cc</code> and text
+                    color of <code>#ffffff</code>.
+                </li>
+                <li>
+                    Use <strong>Padding</strong> (e.g.,
+                    <code>0.2rem 0.5rem</code>) to create space between the text
+                    and the colored background edge.
+                </li>
+                <li>
+                    Use <strong>Margin-bottom</strong> to push the
+                    <code>&lt;h3&gt;</code> down slightly.
+                </li>
+                <li>Apply a small border-radius to round the pill shape.</li>
+            </ul>
+        </section>
+
+        <section id="debrief-homework">
+            <h2>6. Debrief and Homework</h2>
+            <p>
+                Today, we demystified the CSS Box Model and applied it directly
+                to our Capstone project. By understanding the distinction
+                between internal space (Padding) and external space (Margin),
+                and by leveraging
+                <code>box-sizing: border-box</code>, you have established the
+                structural integrity required to build predictable layouts. You
+                successfully styled a professional Kanban column and task cards.
+            </p>
+
+            <h3>Homework Assignment</h3>
+            <p><strong>Expand the Board Structure:</strong></p>
+            <ol>
+                <li>
+                    In <code>index.html</code>, duplicate the
+                    <code>&lt;section class="kanban-column"&gt;</code> block
+                    three times so you have four columns in total.
+                </li>
+                <li>
+                    Change the header text of the new columns to: "In Progress",
+                    "Review", and "Done". Add at least one unique task card to
+                    each new column.
+                </li>
+                <li>
+                    <strong>The Layout Challenge:</strong> Right now, your
+                    columns will stack vertically on top of each other because
+                    they are block-level elements. In <code>styles.css</code>,
+                    try applying <code>display: inline-block;</code> and
+                    <code>vertical-align: top;</code> to the
+                    <code>.kanban-column</code> class.
+                </li>
+                <li>
+                    Use a percentage-based margin (e.g.,
+                    <code>margin-right: 2%;</code>) to put space between the
+                    columns. Note how tedious it is to get them perfectly
+                    aligned side-by-side using the traditional Box Model alone.
+                    <em
+                        >(This frustration is intentional—it perfectly sets the
+                        stage for our upcoming session on CSS Grid!)</em
+                    >
+                </li>
+                <li>
+                    Commit your code to the
+                    <code>feature/box-model</code> branch and push it to GitHub.
+                </li>
+            </ol>
+        </section>
+    </body>
+</html>
