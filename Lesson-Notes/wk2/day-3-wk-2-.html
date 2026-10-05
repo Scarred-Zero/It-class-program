@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 3, Week 2, Session 6: Positioning & Visual Overlays</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e67e22;
+            --background: #fdfdfd;
+            --text-color: #333;
+            --code-bg: #f4f6f8;
+            --border-color: #e1e4e8;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--background);
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 2rem 2rem 5rem 2rem;
+        }
+        header.textbook-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        .capstone-banner {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        h1, h2, h3, h4 {
+            color: var(--primary-color);
+            margin-top: 2.5rem;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        h2 { 
+            font-size: 1.8rem; 
+            border-bottom: 2px solid var(--border-color); 
+            padding-bottom: 0.5rem; 
+        }
+        p { margin-bottom: 1.2rem; }
+        ul, ol { margin-bottom: 1.5rem; padding-left: 2rem; }
+        li { margin-bottom: 0.5rem; }
+        pre {
+            background-color: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1.2rem;
+            overflow-x: auto;
+            border-radius: 4px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        code {
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            background-color: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.95rem;
+        }
+        .diagram-box {
+            border: 2px dashed #95a5a6;
+            background-color: #fafbfc;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-style: italic;
+            color: #555;
+            font-family: monospace;
+            white-space: pre;
+            text-align: left;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0; }
+    </style>
+</head>
+<body>
+
+    <header class="textbook-header">
+        <p><strong>PRACTICAL SOFTWARE ENGINEERING PROGRAM</strong></p>
+        <h1>Day 3, Week 2, Session 6</h1>
+        <p><em>Module: Positioning & Visual Overlays</em></p>
+        <div class="capstone-banner">Capstone Track: Agile Task Board (Kanban-Style)</div>
+    </header>
+
+    <section id="theory-big-picture">
+        <h2>1. Theory: The Big Picture</h2>
+        <p>In standard browser rendering, HTML elements follow the <strong>Normal Document Flow</strong>. Block elements stack vertically from top to bottom, while inline elements flow horizontally from left to right. However, rich software applications like our Agile Task Board require UI elements that break free from this linear layout—such as sticky navigation bars, quick-action card buttons, context dropdowns, and full-screen modal overlays.</p>
+
+        <p>CSS provides the <code>position</code> property to control precisely how and where an element appears relative to its normal position, its parent containers, or the entire browser viewport. Furthermore, when elements overlap, the <code>z-index</code> property introduces a third spatial axis (the Z-axis, pointing toward the user) to establish depth and stacking hierarchy.</p>
+
+        <div class="diagram-box">
+[Textual Diagram: The Five CSS Positioning Modes]
+
+1. static (Default)   : Follows standard document flow. Top/Right/Bottom/Left ignored.
+2. relative           : Remains in document flow, but shifted visually via offset properties.
+                        Acts as the "Containing Block" for absolute descendants.
+3. absolute           : Removed from document flow. Positioned relative to nearest non-static ancestor.
+4. fixed              : Removed from document flow. Anchored directly to the Viewport (screen).
+5. sticky             : Standard flow until a scroll threshold is met, then acts like fixed.
+        </div>
+
+        <p>Mastering these five rules allows engineers to build complex, layered web applications without breaking document semantics or corrupting surrounding content layouts.</p>
+    </section>
+
+    <section id="theory-semantic-web">
+        <h2>2. Theory: Semantic Web (Positioning Mechanics & Stacking Contexts)</h2>
+        <p>Understanding element positioning requires mastering two underlying browser concepts: the <strong>Containing Block</strong> and the <strong>Stacking Context Engine</strong>.</p>
+
+        <h3>The Containing Block Engine</h3>
+        <p>When an element is set to <code>position: absolute</code>, it searches up the DOM tree for the nearest parent element whose <code>position</code> is set to anything other than <code>static</code> (usually <code>relative</code>). That parent becomes its <em>Containing Block</em>. If no positioned ancestor exists, it anchors itself to the initial viewport (the <code>&lt;html&gt;</code> element). Forgetting to set <code>position: relative</code> on a parent card container is one of the most common layout bugs in web development.</p>
+
+        <h3>The Stacking Context & <code>z-index</code></h3>
+        <p>The <code>z-index</code> property dictates which element sits on top when visual elements overlap. Higher values cover lower values. However, <code>z-index</code> is not globally evaluated across the entire page; it operates inside local <strong>Stacking Contexts</strong>.</p>
+
+        <p>A new stacking context is created when an element has:</p>
+        <ul>
+            <li><code>position: relative | absolute | fixed | sticky</code> AND a numeric <code>z-index</code> other than <code>auto</code>.</li>
+            <li>An <code>opacity</code> value less than <code>1</code>.</li>
+            <li>Properties like <code>transform</code>, <code>filter</code>, or <code>perspective</code> active.</li>
+        </ul>
+
+        <div class="note">
+            <strong>Stacking Context Trapping:</strong> If Parent A has <code>z-index: 1</code> and Parent B has <code>z-index: 2</code>, a Child inside Parent A with <code>z-index: 9999</code> will <em>still appear underneath Parent B</em>. The child cannot escape its parent's stacking context.
+        </div>
+
+        <h3>Accessibility Best Practices for Overlays</h3>
+        <p>When creating modal overlays with <code>position: fixed</code>, elements break out of visual flow but remain in DOM flow. You must ensure screen readers interact correctly by using native <code>&lt;dialog&gt;</code> tags or adding <code>role="dialog"</code> and <code>aria-modal="true"</code> attributes to overlay structures.</p>
+    </section>
+
+    <section id="lab-environment-setup">
+        <h2>3. Lab: Environment Setup</h2>
+        <p>We will continue working inside our core Capstone project repository, building out sticky controls, pinned card options, and a modal backdrop on a dedicated feature branch.</p>
+
+        <h3>Step-by-Step Workspace Preparation</h3>
+        <ol>
+            <li><strong>Navigate to Workspace:</strong> Open your terminal and navigate to the <code>agile-task-board</code> directory created in Session 5.</li>
+            <li><strong>Checkout Feature Branch:</strong> Create and switch to a new Git branch named <code>feature/positioning-overlays</code>:
+<pre><code>git checkout -b feature/positioning-overlays</code></pre>
+            </li>
+            <li><strong>Verify File Structure:</strong> Ensure <code>index.html</code> and <code>styles.css</code> are linked properly and open in VS Code.</li>
+            <li><strong>Launch Live Server:</strong> Start your Live Server extension to preview real-time changes.</li>
+        </ol>
+    </section>
+
+    <section id="lab-guided-coding">
+        <h2>4. Lab: Guided Coding</h2>
+        <p>We will now implement three critical positioning patterns on our Agile Task Board:</p>
+        <ol>
+            <li>A <strong>Sticky Top Navigation Header</strong> that remains visible as the user scrolls through tasks.</li>
+            <li>An <strong>Absolute Quick-Action Button</strong> pinned inside each task card using relative positioning.</li>
+            <li>A <strong>Fixed Modal Backdrop & Dialog Overlay</strong> for task creation/editing that floats above all content.</li>
+        </ol>
+
+        <h3>Step 1: Updating the HTML Structure</h3>
+        <p>Open <code>index.html</code> and replace its contents with the following updated structure containing navigation controls, cards, and an modal overlay:</p>
+
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Agile Task Board - Layout Positioning&lt;/title&gt;
+    &lt;link rel="stylesheet" href="styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+    &lt;!-- Sticky Application Header --&gt;
+    &lt;header class="app-header"&gt;
+        &lt;div class="header-brand"&gt;
+            &lt;h1&gt;Agile Task Board&lt;/h1&gt;
+        &lt;/div&gt;
+        &lt;button class="btn-primary" id="open-modal-btn"&gt;+ New Task&lt;/button&gt;
+    &lt;/header&gt;
+
+    &lt;!-- Main Board Container --&gt;
+    &lt;main class="kanban-board"&gt;
+        
+        &lt;!-- To Do Column --&gt;
+        &lt;section class="kanban-column"&gt;
+            &lt;header class="column-header"&gt;
+                &lt;h2&gt;To Do&lt;/h2&gt;
+            &lt;/header&gt;
+
+            &lt;!-- Task Card with Absolute Action Button --&gt;
+            &lt;article class="task-card"&gt;
+                &lt;button class="card-action-btn" aria-label="Task options"&gt;&amp;vellip;&lt;/button&gt;
+                &lt;span class="task-tag"&gt;Backend&lt;/span&gt;
+                &lt;h3&gt;Setup Database Schema&lt;/h3&gt;
+                &lt;p&gt;Design PostgreSQL tables for Users, Boards, and Tasks.&lt;/p&gt;
+            &lt;/article&gt;
+
+            &lt;article class="task-card"&gt;
+                &lt;button class="card-action-btn" aria-label="Task options"&gt;&amp;vellip;&lt;/button&gt;
+                &lt;span class="task-tag"&gt;Architecture&lt;/span&gt;
+                &lt;h3&gt;Configure FastAPI Routing&lt;/h3&gt;
+                &lt;p&gt;Set up base REST endpoints for task CRUD operations.&lt;/p&gt;
+            &lt;/article&gt;
+        &lt;/section&gt;
+
+    &lt;/main&gt;
+
+    &lt;!-- Fixed Visual Overlay Modal Backdrop --&gt;
+    &lt;div class="modal-backdrop" id="task-modal"&gt;
+        &lt;div class="modal-dialog" role="dialog" aria-labelledby="modal-title" aria-modal="true"&gt;
+            &lt;button class="modal-close-btn" aria-label="Close modal"&gt;&amp;times;&lt;/button&gt;
+            &lt;h2 id="modal-title"&gt;Create New Task&lt;/h2&gt;
+            &lt;form class="modal-form"&gt;
+                &lt;label for="task-title"&gt;Task Title&lt;/label&gt;
+                &lt;input type="text" id="task-title" name="title" placeholder="e.g., Implement JWT Auth" required&gt;
+                
+                &lt;label for="task-desc"&gt;Description&lt;/label&gt;
+                &lt;textarea id="task-desc" name="description" rows="4" placeholder="Task details..."&gt;&lt;/textarea&gt;
+                
+                &lt;div class="form-actions"&gt;
+                    &lt;button type="submit" class="btn-primary"&gt;Save Task&lt;/button&gt;
+                &lt;/div&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <h3>Step 2: Implementing Positioning in CSS</h3>
+        <p>Open <code>styles.css</code> and add the following positioning rules. Notice how each positioning mode serves a specific functional role:</p>
+
+<pre><code>/* 1. Global Reset & Body Setup */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #ebecf0;
+    color: #172b4d;
+    min-height: 150vh; /* Extended height to demonstrate sticky scrolling */
+}
+
+/* 2. STICKY POSITIONING: Application Header */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100; /* Keeps header floating above board content during scroll */
+    background-color: #0052cc;
+    color: #ffffff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: #ffab00;
+    color: #172b4d;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 3. RELATIVE & ABSOLUTE POSITIONING: Card Anchoring */
+.kanban-board {
+    padding: 2rem;
+}
+
+.kanban-column {
+    background-color: #f4f5f7;
+    width: 350px;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #dfe1e6;
+}
+
+/* RELATIVE ANCHOR: Establishes a containing block for absolute children */
+.task-card {
+    position: relative; 
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    border: 1px solid #dfe1e6;
+    box-shadow: 0 1px 2px rgba(9, 30, 66, 0.1);
+}
+
+/* ABSOLUTE CHILD: Pinned relative to top-right corner of .task-card */
+.card-action-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #6b778c;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+}
+
+.card-action-btn:hover {
+    background-color: #ebecf0;
+    color: #172b4d;
+}
+
+.task-tag {
+    display: inline-block;
+    background-color: #deebff;
+    color: #0747a6;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+}
+
+/* 4. FIXED POSITIONING & OVERLAYS: Modal Dialog */
+/* Backdrop covers the entire viewport */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(9, 30, 66, 0.54); /* Semi-transparent dark overlay */
+    z-index: 1000; /* Floats above sticky headers and cards */
+    
+    /* Center modal box on screen */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Centered Dialog Window */
+.modal-dialog {
+    position: relative; /* Containing block for the close button */
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(9, 30, 66, 0.25);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b778c;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.modal-form input, 
+.modal-form textarea {
+    padding: 0.6rem;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    font-family: inherit;
+}</code></pre>
+
+        <div class="note">
+            <strong>Debugging Inspection:</strong> Save your files and inspect the browser window. Notice how scrolling down causes the blue <code>.app-header</code> to stick to the top edge (<code>top: 0</code>), smoothly passing <em>over</em> task cards but remaining <em>underneath</em> the fixed modal overlay due to their relative <code>z-index</code> values (100 vs 1000).
+        </div>
+    </section>
+
+    <section id="classwork">
+        <h2>5. Classwork</h2>
+        <p>In Agile management interfaces, urgent tasks display a "Priority Badge" (e.g., "HIGH") anchored over the top-right corner of the card container, overlapping its upper border.</p>
+
+        <p><strong>Your Goal:</strong> Construct an absolute-positioned Priority Ribbon using spatial offsets.</p>
+
+        <ol>
+            <li>Add the following span tag inside the first <code>.task-card</code> element in <code>index.html</code>:<br>
+                <code>&lt;span class="priority-badge high"&gt;HIGH&lt;/span&gt;</code>
+            </li>
+            <li>In <code>styles.css</code>, write the CSS rule for <code>.priority-badge</code> adhering to these criteria:
+                <ul>
+                    <li>Set <code>position: absolute;</code></li>
+                    <li>Anchor it using negative offsets: <code>top: -8px;</code> and <code>right: 12px;</code> so it overlaps the top border of the card.</li>
+                    <li>Set background color to <code>#ff5630</code> (danger red) and text color to white.</li>
+                    <li>Apply <code>font-size: 0.65rem;</code>, <code>font-weight: bold;</code>, <code>padding: 0.1rem 0.4rem;</code>, and <code>border-radius: 3px;</code>.</li>
+                    <li>Assign <code>z-index: 2;</code> to ensure it floats above all internal card content.</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+
+    <section id="debrief-homework">
+        <h2>6. Debrief and Homework</h2>
+        <p>Today, we explored the five modes of CSS positioning (<code>static</code>, <code>relative</code>, <code>absolute</code>, <code>fixed</code>, and <code>sticky</code>) and mastered stacking depth using <code>z-index</code> layers. We transformed our Agile Task Board by adding a sticky control bar, card-relative action buttons, absolute tags, and a fixed modal overlay.</p>
+
+        <h3>Reflective Questions</h3>
+        <ol>
+            <li>Why does an element with <code>position: absolute</code> move relative to the entire page if none of its parent elements have a position set?</li>
+            <li>If a sticky navigation bar is hidden beneath scrolling cards, what CSS property and rule set should you inspect to fix the issue?</li>
+        </ol>
+
+        <h3>Homework Assignment</h3>
+        <p><strong>Build an Interactive Task Context Menu & Slide-out Drawer:</strong></p>
+        <ol>
+            <li>Work on your <code>feature/positioning-overlays</code> branch.</li>
+            <li>In <code>index.html</code>, add a hidden contextual drop-down menu inside a <code>.task-card</code> beneath the <code>.card-action-btn</code> button.</li>
+            <li>Style this menu using <code>position: absolute</code> so it floats directly below the action button with a higher <code>z-index</code> than surrounding cards. Give it actions like "Edit Task", "Move Column", and "Delete Task".</li>
+            <li>Create a slide-out "Task Details Sidebar" container on the right edge of the screen using <code>position: fixed; top: 0; right: 0; width: 320px; height: 100vh; z-index: 900;</code>.</li>
+            <li>Commit all updates with a semantic commit message (e.g., <code>feat: implement task context menu and slideout positioning overlays</code>) and push your branch to GitHub.</li>
+        </ol>
+    </section>
+
+</body>
+</html>
