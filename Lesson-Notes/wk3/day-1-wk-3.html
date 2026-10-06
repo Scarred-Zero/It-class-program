@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            Week 3, Session 7: CSS Flexbox Core Architecture - Course Notes
+        </title>
+        <style>
+            :root {
+                --primary-color: #0f172a;
+                --accent-color: #2563eb;
+                --text-color: #1e293b;
+                --bg-light: #f8fafc;
+                --border-color: #e2e8f0;
+                --code-bg: #1e1e1e;
+                --code-text: #d4d4d4;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+                    sans-serif;
+                line-height: 1.7;
+                color: var(--text-color);
+                background-color: #f1f5f9;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 960px;
+                margin: 0 auto;
+                background: #ffffff;
+                padding: 40px 60px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            }
+
+            header {
+                border-bottom: 2px solid var(--border-color);
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+            }
+
+            header h1 {
+                color: var(--primary-color);
+                font-size: 2.2rem;
+                margin: 0 0 10px 0;
+            }
+
+            header .meta {
+                font-weight: 600;
+                color: var(--accent-color);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-size: 0.9rem;
+            }
+
+            h2 {
+                color: var(--primary-color);
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 8px;
+                margin-top: 40px;
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                color: #334155;
+                margin-top: 25px;
+                font-size: 1.2rem;
+            }
+
+            p,
+            ul,
+            ol {
+                margin-bottom: 1.2rem;
+            }
+
+            ul,
+            ol {
+                padding-left: 25px;
+            }
+
+            li {
+                margin-bottom: 0.5rem;
+            }
+
+            code {
+                font-family: "Consolas", "Courier New", Courier, monospace;
+                background-color: #f1f5f9;
+                color: #0f172a;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.9em;
+            }
+
+            pre {
+                background-color: var(--code-bg);
+                color: var(--code-text);
+                padding: 20px;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-family: "Consolas", "Courier New", Courier, monospace;
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            pre code {
+                background-color: transparent;
+                color: inherit;
+                padding: 0;
+            }
+
+            .diagram {
+                background-color: #0f172a;
+                color: #38bdf8;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-family: monospace;
+                white-space: pre;
+                overflow-x: auto;
+                margin: 20px 0;
+                line-height: 1.3;
+            }
+
+            .callout {
+                background-color: #eff6ff;
+                border-left: 4px solid var(--accent-color);
+                padding: 15px 20px;
+                margin: 20px 0;
+                border-radius: 0 8px 8px 0;
+            }
+
+            .callout.warning {
+                background-color: #fff1f2;
+                border-left-color: #e11d48;
+            }
+
+            .callout-title {
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: var(--primary-color);
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }
+
+            th,
+            td {
+                border: 1px solid var(--border-color);
+                padding: 10px 14px;
+                text-align: left;
+            }
+
+            th {
+                background-color: #f8fafc;
+                color: var(--primary-color);
+            }
+
+            footer {
+                margin-top: 50px;
+                padding-top: 20px;
+                border-top: 1px solid var(--border-color);
+                font-size: 0.85rem;
+                color: #64748b;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <div class="meta">
+                    Practical Software Engineering • Week 3: Session 7
+                </div>
+                <h1>CSS Flexbox Core Architecture</h1>
+            </header>
+
+            <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+            <section>
+                <h2>1. Theory: The Big Picture</h2>
+                <p>
+                    Over the past two weeks, we successfully established the
+                    foundational HTML architecture and the Box Model geometry
+                    for our <strong>Agile Task Board</strong>. You have
+                    expertly implemented <code>position: absolute</code> for the
+                    priority indicator dots and utilized fixed positioning for
+                    the <code>.modal-backdrop</code> and
+                    <code>.activity-drawer</code>.
+                </p>
+
+                <p>
+                    However, laying out the macro-structure—getting the four
+                    Kanban columns to sit perfectly side-by-side, or aligning
+                    the buttons inside a task card header—using traditional
+                    block/inline mechanics or floats is notoriously fragile.
+                    Before the CSS Flexible Box Layout Module (Flexbox),
+                    software engineers had to rely on brittle hacks (like
+                    <code>float: left</code> with <code>clearfix</code>) that
+                    were not designed for dynamic web applications.
+                </p>
+
+                <div class="diagram">
+                LEGACY APPROACH (Floats & Clears)               MODERN APPROACH (Flexbox)
+                +---------------------------------------+       +---------------------------------------+
+                | .column { float: left; width: 25%; }  |       | .kanban-board { display: flex; }      |
+                | .clearfix::after { clear: both; }     |  ==>  | .column { flex: 1; }                  |
+                | * Rigid, brittle, overflows easily    |       | * Dynamic, fluid, explicit alignment  |
+                +---------------------------------------+       +---------------------------------------+
+                </div>
+
+                <p>
+                    Flexbox was engineered specifically as a
+                    <strong>one-dimensional (1D) layout model</strong>. It
+                    excels at distributing space and aligning items along a
+                    single primary direction—either horizontally (as a row) or
+                    vertically (as a column). Today, we transition our
+                    Kanban layout from static blocks into a fluid, robust
+                    Flexbox architecture.
+                </p>
+            </section>
+
+            <!-- SECTION 2: THEORY - FLEXBOX ARCHITECTURE -->
+            <section>
+                <h2>2. Theory: Flexbox Architecture</h2>
+
+                <h3>2.1 The Flex Axis Geometry</h3>
+                <p>
+                    To master Flexbox, you must discard standard physical
+                    positioning (top/bottom/left/right) and think in terms of
+                    two mathematical axes: the <strong>Main Axis</strong> and
+                    the <strong>Cross Axis</strong>.
+                </p>
+
+                <div class="diagram">
+                                    MAIN AXIS (flex-direction: row)
+                            Main-Start --------------------------------> Main-End
+                            +-------------------------------------------------+
+                            |  +--------------+              +--------------+ |
+                            |  | Flex Item 1  |              | Flex Item 2  | |
+                CROSS AXIS  |  +--------------+              +--------------+ |
+                Cross-Start |                                                 |
+                    |       |  +--------------+                               |
+                    |       |  | Flex Item 3  |                               |
+                    |       |  +--------------+                               |
+                    v       +-------------------------------------------------+
+                Cross-End
+                </div>
+
+                <ul>
+                    <li>
+                        <strong>Main Axis:</strong> The primary trajectory of
+                        flex items, dictated by
+                        <code>flex-direction</code>.
+                    </li>
+                    <li>
+                        <strong>Cross Axis:</strong> The perpendicular
+                        trajectory. If your main axis is a row, the cross axis
+                        handles vertical alignment.
+                    </li>
+                </ul>
+
+                <h3>2.2 Parent Flex Container Properties</h3>
+                <p>
+                    By declaring <code>display: flex</code> on an element, it
+                    becomes a <strong>Flex Container</strong>, and its direct
+                    children instantly become <strong>Flex Items</strong>.
+                    Container properties dictate the overarching layout
+                    rules.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Accepted Values</th>
+                            <th>Architectural Behavior</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>flex-direction</code></td>
+                            <td>
+                                <code
+                                    >row | row-reverse | column |
+                                    column-reverse</code
+                                >
+                            </td>
+                            <td>
+                                Sets the Main Axis. We will use
+                                <code>row</code> for our Kanban board and
+                                <code>column</code> for the internal columns.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>justify-content</code></td>
+                            <td>
+                                <code
+                                    >flex-start | flex-end | center |
+                                    space-between | space-around</code
+                                >
+                            </td>
+                            <td>
+                                Aligns items along the
+                                <strong>Main Axis</strong>. Excellent
+                                for pushing a "Delete" button to the far right.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>align-items</code></td>
+                            <td>
+                                <code
+                                    >stretch | flex-start | flex-end | center |
+                                    baseline</code
+                                >
+                            </td>
+                            <td>
+                                Aligns items along the
+                                <strong>Cross Axis</strong> on the current
+                                line. (e.g., vertically centering
+                                navbar avatars).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>flex-wrap</code></td>
+                            <td><code>nowrap | wrap | wrap-reverse</code></td>
+                            <td>
+                                Determines if items are forced onto a single
+                                line (overflowing if necessary) or wrap across
+                                multiple lines.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>gap</code></td>
+                            <td>
+                                <code>&lt;length&gt;</code> (e.g.,
+                                <code>1rem</code>)
+                            </td>
+                            <td>
+                                Injects explicit spacing between flex items
+                                natively, replacing the need for messy margin
+                                calculations.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>2.3 Child Flex Item Properties</h3>
+                <p>
+                    Properties applied directly to flex items dictate how they
+                    consume or forfeit space relative to their siblings.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Default</th>
+                            <th>Engineering Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>flex-grow</code></td>
+                            <td><code>0</code></td>
+                            <td>
+                                How much an item expands relative to siblings if
+                                extra positive space exists.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>flex-shrink</code></td>
+                            <td><code>1</code></td>
+                            <td>
+                                How much an item shrinks if the container lacks
+                                sufficient space. Setting
+                                <code>0</code> prevents shrinking.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>flex-basis</code></td>
+                            <td><code>auto</code></td>
+                            <td>
+                                The ideal initial size of the item before
+                                remaining space is distributed.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>flex</code></td>
+                            <td><code>0 1 auto</code></td>
+                            <td>
+                                Shorthand for
+                                <code>flex-grow flex-shrink flex-basis</code>.
+                                Always use this in production!
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+            <section>
+                <h2>3. Lab: Environment Setup</h2>
+                <p>
+                    Since our <code>agile-task-board</code> repository is
+                    already configured with semantic HTML and Box Model CSS, we
+                    will branch off our main codebase to safely integrate the
+                    Flexbox layout.
+                </p>
+
+                <h3>Step 1: Version Control Initialization</h3>
+                <p>
+                    Open your terminal within the project directory and create a
+                    new feature branch for our Flexbox refactoring:
+                </p>
+                <pre><code>cd agile-task-board
+git status
+git checkout -b feature/flexbox-core</code></pre>
+
+                <h3>Step 2: IDE & Inspector Configuration</h3>
+                <ol>
+                    <li>
+                        Open the project in Visual Studio Code:
+                        <code>code .</code>
+                    </li>
+                    <li>
+                        Launch the <strong>Live Server</strong> extension to
+                        preview <code>index.html</code>.
+                    </li>
+                    <li>
+                        Open Chrome Developer Tools (<code>F12</code>). Navigate
+                        to the <strong>Elements</strong> tab. As we apply
+                        <code>display: flex</code>, click the blue
+                        <strong><code>flex</code></strong> badge next to the
+                        elements in the DOM tree to visualize the layout
+                        algorithms in real-time.
+                    </li>
+                </ol>
+            </section>
+
+            <!-- SECTION 4: LAB - GUIDED CODING -->
+            <section>
+                <h2>4. Lab: Guided Coding (Refactoring to Flexbox)</h2>
+                <p>
+                    We are going to inject Flexbox into three critical areas of
+                    our existing architecture: the sticky
+                    <code>.app-navbar</code>, the main
+                    <code>.kanban-board</code> container, and the headers inside
+                    our <code>.task-card</code> components.
+                </p>
+
+                <h3>Step 1: Refactoring the App Navbar</h3>
+                <p>
+                    Currently, our navbar items are likely stacking or floating.
+                    Let's make them a horizontal flex row.
+                </p>
+
+                <p>
+                    <strong>Update <code>styles.css</code>:</strong>
+                </p>
+                <pre><code>/* ==========================================================================
+   APP NAVBAR REFACTOR (Flex Row)
+   ========================================================================== */
+.app-navbar {
+  /* Existing styles (sticky, z-index, etc.) remain */
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  background-color: var(--bg-light);
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  
+  /* NEW FLEXBOX RULES */
+  display: flex;
+  flex-direction: row;               /* Main axis is horizontal */
+  justify-content: space-between;    /* Pushes logo to left, profile to right */
+  align-items: center;               /* Vertically centers items along the cross axis */
+}
+
+/* Flex item grouping inside navbar */
+.navbar-brand, .navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Spacing between internal elements */
+}</code></pre>
+
+                <h3>Step 2: Structuring the Kanban Board & Columns</h3>
+                <p>
+                    Our four columns ("To Do", "In Progress", "Review", "Done")
+                    need to sit side-by-side, allow horizontal scrolling if the
+                    screen is too small, and stretch vertically to match each
+                    other.
+                </p>
+
+                <p>
+                    <strong>Update <code>styles.css</code>:</strong>
+                </p>
+                <pre><code>/* ==========================================================================
+   KANBAN BOARD (Parent Flex Container)
+   ========================================================================== */
+.kanban-board {
+  display: flex;                     /* Children (.kanban-column) sit in a row */
+  flex-direction: row;
+  align-items: flex-start;           /* Columns align to top, won't stretch infinitely yet */
+  gap: 1.5rem;                       /* 24px gap between columns natively! */
+  padding: 2rem;
+  overflow-x: auto;                  /* Enable horizontal scrolling for narrow viewports */
+  height: calc(100vh - 75px);        /* Fill remaining viewport height below navbar */
+}
+
+/* ==========================================================================
+   KANBAN COLUMN (Child of Board, Parent to Cards)
+   ========================================================================== */
+.kanban-column {
+  /* flex: grow shrink basis */
+  flex: 0 0 320px;                   /* Fixed 320px width, won't shrink, won't grow */
+  
+  display: flex;                     /* Nested Flexbox! Column is now a container itself */
+  flex-direction: column;            /* Main axis is now vertical */
+  
+  background-color: #f4f5f7;
+  border-radius: 8px;
+  max-height: 100%;                  /* Confine to board height */
+}
+
+/* The scrollable area inside the column for task cards */
+.task-list {
+  flex-grow: 1;                      /* Takes up all remaining vertical space in column */
+  overflow-y: auto;                  /* Independent vertical scrolling */
+  padding: 0.5rem 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;                         /* Spacing between task cards */
+}</code></pre>
+
+                <h3>Step 3: Aligning the Task Card Internals</h3>
+                <p>
+                    Our <code>.task-card</code> already utilizes
+                    <code>position: relative</code> to anchor the absolute
+                    <code>.priority-indicator</code> dot. Now, we use Flexbox to
+                    align the card's header data (the category tag and the
+                    action menu button).
+                </p>
+
+                <p>
+                    <strong
+                        >HTML Review (Inside <code>index.html</code>):</strong
+                    >
+                </p>
+                <pre><code>&lt;article class="task-card"&gt;
+  &lt;!-- Existing absolute positioning anchor --&gt;
+  &lt;div class="priority-indicator high"&gt;&lt;/div&gt;
+  
+  &lt;!-- Refactoring this header using Flexbox --&gt;
+  &lt;header class="task-card-header"&gt;
+    &lt;span class="category-tag"&gt;Frontend&lt;/span&gt;
+    &lt;button class="btn-icon" aria-label="Task options"&gt;⋮&lt;/button&gt;
+  &lt;/header&gt;
+
+  &lt;h3 class="task-title"&gt;Implement Auth Interceptor&lt;/h3&gt;
+  
+  &lt;footer class="task-card-footer"&gt;
+    &lt;span class="task-assignee"&gt;CK&lt;/span&gt;
+  &lt;/footer&gt;
+&lt;/article&gt;</code></pre>
+
+                <p>
+                    <strong>Update <code>styles.css</code>:</strong>
+                </p>
+                <pre><code>/* ==========================================================================
+   TASK CARD (Flex Child & Container)
+   ========================================================================== */
+.task-card {
+  position: relative; /* Anchor for .priority-indicator */
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  padding: 1rem;
+  
+  /* Make the card itself a flex column so footer goes to bottom */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-card-header {
+  display: flex;
+  justify-content: space-between; /* Tag left, Button right */
+  align-items: flex-start;        /* Align top */
+}
+
+/* Prevent the icon button from getting squished if text is long */
+.task-card-header .btn-icon {
+  flex-shrink: 0;
+}</code></pre>
+
+                <div class="callout">
+                    <div class="callout-title">💡 Debugging Insight</div>
+                    <p>
+                        Notice how we use <code>flex-shrink: 0</code> on the
+                        <code>.btn-icon</code> inside the card header. If the
+                        <code>.category-tag</code> text was extremely long, the
+                        flex algorithm might attempt to shrink the button to
+                        make room. By declaring <code>flex-shrink: 0</code>, we
+                        instruct the browser to preserve the button's explicit
+                        dimensions regardless of container constraints.
+                    </p>
+                </div>
+            </section>
+
+            <!-- SECTION 5: CLASSWORK -->
+            <section>
+                <h2>5. Classwork</h2>
+
+                <h3>Task Requirement</h3>
+                <p>
+                    We have a <code>.activity-drawer</code> that currently
+                    slides out using fixed positioning. Inside this drawer,
+                    there is a header section containing a Title ("Activity
+                    Log") and a Close Button ("X").
+                </p>
+                <p>
+                    Your task is to write the CSS to convert the
+                    <code>.drawer-header</code> into a Flexbox container. You
+                    must ensure the Title is aligned to the left, the Close
+                    Button is pushed to the far right, and both are vertically
+                    centered.
+                </p>
+
+                <p><strong>Existing HTML:</strong></p>
+                <pre><code>&lt;aside class="activity-drawer"&gt;
+  &lt;header class="drawer-header"&gt;
+    &lt;h2&gt;Activity Log&lt;/h2&gt;
+    &lt;button class="btn-close"&gt;X&lt;/button&gt;
+  &lt;/header&gt;
+  &lt;div class="drawer-content"&gt;...&lt;/div&gt;
+&lt;/aside&gt;</code></pre>
+
+                <h3>Solution Code</h3>
+                <pre><code>/* Classwork Solution: Drawer Header Flexbox */
+.drawer-header {
+  display: flex;                     /* Initializes Flex context */
+  flex-direction: row;               /* Main axis is horizontal */
+  justify-content: space-between;    /* Pushes H2 left, Button right */
+  align-items: center;               /* Vertically centers them */
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.btn-close {
+  flex-shrink: 0;                    /* Prevents the button from distorting */
+  /* button styling... */
+}</code></pre>
+            </section>
+
+            <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+            <section>
+                <h2>6. Debrief and Homework</h2>
+
+                <h3>Key Takeaways</h3>
+                <ol>
+                    <li>
+                        Flexbox is a 1D layout mechanism that fundamentally
+                        replaces legacy floating and clearing techniques.
+                    </li>
+                    <li>
+                        By nesting Flex containers (e.g., a Flex row
+                        <code>.kanban-board</code> containing Flex column
+                        <code>.kanban-column</code>s), you construct highly
+                        complex, scalable UI architectures.
+                    </li>
+                    <li>
+                        Parent properties (<code>justify-content</code>,
+                        <code>align-items</code>) manage spatial
+                        distribution, while child properties
+                        (<code>flex-shrink</code>) protect structural integrity.
+                    </li>
+                </ol>
+
+                <h3>Reflective Engineering Questions</h3>
+                <ol>
+                    <li>
+                        <em
+                            >If we changed <code>.kanban-board</code> to
+                            <code>flex-direction: column</code>, how would the
+                            visual behavior of <code>justify-content</code> and
+                            <code>align-items</code> shift?</em
+                        >
+                    </li>
+                    <li>
+                        <em
+                            >Why did we set <code>flex: 0 0 320px</code> on the
+                            Kanban columns instead of just
+                            <code>width: 320px</code>?</em
+                        >
+                    </li>
+                </ol>
+
+                <h3>
+                    Homework Assignment: Modal Action Bar Alignment
+                </h3>
+                <p>
+                    We previously built a fixed modal overlay
+                    (<code>.modal-backdrop</code>) for our Task Creation form.
+                    Inside that modal, there is a footer containing action
+                    buttons.
+                </p>
+
+                <h4>Assignment Requirements</h4>
+                <ol>
+                    <li>
+                        Target the <code>.modal-footer</code> class in your CSS.
+                    </li>
+                    <li>
+                        Implement a Flexbox layout that places the "Delete Task"
+                        button (if editing) on the
+                        <strong>far-left</strong> edge of the footer, while
+                        keeping the "Cancel" and "Save Task" buttons grouped
+                        together on the <strong>far-right</strong> edge.
+                    </li>
+                    <li>
+                        <em>Hint:</em> Group the Cancel and Save buttons inside
+                        their own nested
+                        <code>&lt;div class="modal-actions-right"&gt;</code>
+                        container, and use
+                        <code>justify-content: space-between</code> on the
+                        parent footer.
+                    </li>
+                </ol>
+
+                <h4>Submission Criteria</h4>
+                <ul>
+                    <li>
+                        Commit your updated HTML and CSS files to your
+                        <code>feature/flexbox-core</code> branch.
+                    </li>
+                    <li>
+                        Merge the branch into <code>main</code> and verify that
+                        the layout scales fluidly without overflow bugs.
+                    </li>
+                </ul>
+            </section>
+
+            <footer>
+                <p>
+                    Practical Software Engineering Curriculum • Agile Task Board
+                    Architecture (Kanban-Style)
+                </p>
+            </footer>
+        </div>
+    </body>
+</html>
