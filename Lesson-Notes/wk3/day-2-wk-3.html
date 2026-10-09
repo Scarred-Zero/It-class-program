@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 3, Session 8: CSS Grid Architecture - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 3: Session 8</div>
+      <h1>CSS Grid Architecture</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>In Session 7, we mastered <strong>CSS Flexbox</strong>—a one-dimensional (1D) layout model designed to distribute space and align items along a single row or column axis. While Flexbox is ideal for directional navigation components, inline toolbars, and card sub-headers, attempting to build complex, two-dimensional user interfaces using only Flexbox leads to nested wrapper elements (div soup), rigid height calculations, and brittle layout structures.</p>
+
+      <p><strong>CSS Grid Layout</strong> is a true <strong>two-dimensional (2D) layout engine</strong> built directly into the web browser. It allows software engineers to organize content into aligned rows AND columns simultaneously. Rather than pushing elements around based on content flow, CSS Grid creates a structured coordinate system (tracks, lines, and areas) into which child elements can be precisely placed.</p>
+
+      <div class="diagram">
+FLEXBOX (1D: Content-Driven Axis)            CSS GRID (2D: Layout-Driven Tracks)
++-----------------------------------+       +-----------------------------------+
+| [ Item 1 ] [ Item 2 ] [ Item 3 ]  |       | Line 1    Line 2    Line 3    Line 4
+| (Linear flow along main axis)     |       |   |         |         |         |
++-----------------------------------+       |---+---------+---------+---------| Row 1
+                                            |   | Cell 1  | Cell 2  | Cell 3  |
+                                            |---+---------+---------+---------| Row 2
+                                            |   | Cell 4  | Cell 5  | Cell 6  |
+                                            +---+---------+---------+---------+
+      </div>
+
+      <p>In full-stack engineering, Flexbox and Grid are complementary tools rather than competitors:</p>
+      <ul>
+        <li><strong>CSS Grid (Macro-Layout):</strong> Structures overall application page shells, multi-widget dashboards, complex form structures, and two-dimensional card matrices.</li>
+        <li><strong>CSS Flexbox (Micro-Layout):</strong> Aligns internal component items inside individual grid cells, such as button groups, badge rows, and avatar alignments.</li>
+      </ul>
+
+      <p>In our <strong>Agile Task Board</strong> codebase, we will use CSS Grid to build a responsive 2D Task Analytics Widget Shell and refactor our <code>.modal-form</code> into a strict multi-column form grid.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - SEMANTIC WEB & TECHNICAL STANDARDS -->
+    <section>
+      <h2>2. Theory: CSS Grid Architecture & Mechanics</h2>
+
+      <h3>2.1 The Grid Coordinate System</h3>
+      <p>When you declare <code>display: grid</code> on a container, the browser initializes an explicit grid coordinate framework consisting of four core geometric constructs:</p>
+
+      <div class="diagram">
+  Grid Line 1      Grid Line 2      Grid Line 3      Grid Line 4
+       |                |                |                |
+  -----+----------------+----------------+----------------+----- Grid Line 1
+       |  Grid Cell     |  Grid Track    |                |
+       |  (Row 1/Col 1) |  (Column 2)    |                |
+  -----+----------------+----------------+----------------+----- Grid Line 2
+       |                |  Grid Area     |                |
+       |                |  (Spans 2x2)   |                |
+  -----+----------------+----------------+----------------+----- Grid Line 3
+      </div>
+
+      <ul>
+        <li><strong>Grid Lines:</strong> The numbered horizontal and vertical boundary lines dividing the grid (1-indexed starting from the start edge).</li>
+        <li><strong>Grid Tracks:</strong> The space between two adjacent grid lines (a grid row or a grid column).</li>
+        <li><strong>Grid Cells:</strong> A single intersection unit between a grid row track and a grid column track.</li>
+        <li><strong>Grid Areas:</strong> A rectangular region bounded by four grid lines containing one or more grid cells.</li>
+      </ul>
+
+      <h3>2.2 Explicit Tracks & The Fractional Unit (<code>fr</code>)</h3>
+      <p>Explicit columns and rows are defined on the grid container using <code>grid-template-columns</code> and <code>grid-template-rows</code>. While fixed units (<code>px</code>, <code>rem</code>) and fluid units (<code>%</code>) are supported, CSS Grid introduces the **Fractional Unit (<code>fr</code>)**.</p>
+
+      <p>The <code>fr</code> unit represents a fraction of the available free space inside the grid container after all fixed gaps and static elements have been calculated:</p>
+
+      <pre><code>/* 3-Column Layout: Column 1 is 250px; Column 2 & 3 split remaining space 1:2 */
+.grid-container {
+  display: grid;
+  grid-template-columns: 250px 1fr 2fr;
+  gap: 1.5rem;
+}</code></pre>
+
+      <h3>2.3 Grid Functions: <code>repeat()</code> and <code>minmax()</code></h3>
+      <p>CSS Grid provides native functions to optimize track definitions without manual repetition:</p>
+
+      <ul>
+        <li><code>repeat(count, track_size)</code>: Duplicates track sizes. E.g., <code>repeat(4, 1fr)</code> creates 4 equal columns.</li>
+        <li><code>minmax(min, max)</code>: Sets a fluid bounds boundary. E.g., <code>minmax(280px, 1fr)</code> ensures a column never shrinks below <code>280px</code> but expands flexibly to consume available space.</li>
+      </ul>
+
+      <h3>2.4 Semantic Area Mapping with <code>grid-template-areas</code></h3>
+      <p>One of the most powerful features of CSS Grid is <code>grid-template-areas</code>, which allows engineers to define visual layout layouts using ASCII-like string syntax. Child elements are assigned to named areas using the <code>grid-area</code> property.</p>
+
+      <pre><code>/* Container Definition */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  grid-template-rows: 70px 1fr 50px;
+  grid-template-areas:
+    "nav    header"
+    "nav    main"
+    "nav    footer";
+  gap: 1rem;
+}
+
+/* Item Assignments */
+.app-header  { grid-area: header; }
+.app-sidebar { grid-area: nav; }
+.app-main    { grid-area: main; }
+.app-footer  { grid-area: footer; }</code></pre>
+
+      <h3>2.5 Summary Table: Container vs Item Properties</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Level</th>
+            <th>Property</th>
+            <th>Accepted Syntax</th>
+            <th>Architectural Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Container</strong></td>
+            <td><code>display</code></td>
+            <td><code>grid | inline-grid</code></td>
+            <td>Establishes a 2D grid formatting context for direct children.</td>
+          </tr>
+          <tr>
+            <td><strong>Container</strong></td>
+            <td><code>grid-template-columns</code></td>
+            <td><code>repeat(4, 1fr) | 200px 1fr</code></td>
+            <td>Defines explicit column tracks and sizing algorithms.</td>
+          </tr>
+          <tr>
+            <td><strong>Container</strong></td>
+            <td><code>grid-template-rows</code></td>
+            <td><code>auto 1fr auto | repeat(3, 100px)</code></td>
+            <td>Defines explicit row tracks and height behaviors.</td>
+          </tr>
+          <tr>
+            <td><strong>Container</strong></td>
+            <td><code>grid-template-areas</code></td>
+            <td><code>"head head" "side main"</code></td>
+            <td>Maps visual region names onto grid tracks.</td>
+          </tr>
+          <tr>
+            <td><strong>Container</strong></td>
+            <td><code>gap</code></td>
+            <td><code>1rem | 15px 20px</code></td>
+            <td>Sets row and column gutters simultaneously.</td>
+          </tr>
+          <tr>
+            <td><strong>Item</strong></td>
+            <td><code>grid-area</code></td>
+            <td><code>&lt;area-name&gt;</code></td>
+            <td>Assigns a child item to a named grid template region.</td>
+          </tr>
+          <tr>
+            <td><strong>Item</strong></td>
+            <td><code>grid-column</code></td>
+            <td><code>1 / 3 | span 2</code></td>
+            <td>Specifies line start/end or column track span.</td>
+          </tr>
+          <tr>
+            <td><strong>Item</strong></td>
+            <td><code>grid-row</code></td>
+            <td><code>1 / -1 | span 3</code></td>
+            <td>Specifies line start/end or row track span.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will continue development directly within our <code>agile-task-board</code> repository, picking up from our existing <code>index.html</code> and <code>styles.css</code> state.</p>
+
+      <h3>Step 1: Feature Branch Creation</h3>
+      <p>Open your terminal in VS Code and branch off your existing work onto a new feature branch:</p>
+      <pre><code>cd agile-task-board
+git status
+git checkout -b feature/grid-architecture</code></pre>
+
+      <h3>Step 2: Inspector Grid Overlay Setup</h3>
+      <ol>
+        <li>Open <code>index.html</code> with <strong>Live Server</strong>.</li>
+        <li>Open Chrome Developer Tools (<code>F12</code> or <code>Cmd+Option+I</code> / <code>Ctrl+Shift+I</code>).</li>
+        <li>Select the <strong>Elements</strong> panel, inspect elements given <code>display: grid</code>, and click the blue <strong><code>grid</code></strong> badge next to the element in the DOM tree.</li>
+        <li>In the DevTools <strong>Layout</strong> tab, enable <em>"Show line numbers"</em> and <em>"Show area names"</em> to view real-time grid lines and template bounds rendered over your application window.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will apply CSS Grid Architecture to our project codebase in two concrete areas:</p>
+      <ol>
+        <li><strong>Board Summary Analytics Grid:</strong> Adding a 4-widget metrics section right inside our main board workspace before the columns.</li>
+        <li><strong>Multi-Column Modal Form Refactoring:</strong> Converting our task creation modal (<code>.modal-form</code>) from a single-column flex column into a robust, 2D Grid structure using <code>grid-template-areas</code>.</li>
+      </ol>
+
+      <h3>Step 1: Update Semantic HTML (<code>index.html</code>)</h3>
+      <p>Modify <code>index.html</code> to insert the <code>.dashboard-summary</code> grid inside <code>&lt;main class="kanban-board"&gt;</code> before the columns, and update the <code>.modal-form</code> structure to support grid area assignments:</p>
+
+      <pre><code>&lt;!-- Inserted inside &lt;main class="kanban-board"&gt; above columns --&gt;
+&lt;section class="dashboard-summary"&gt;
+  &lt;div class="metric-card"&gt;
+    &lt;span class="metric-title"&gt;Total Tasks&lt;/span&gt;
+    &lt;span class="metric-value"&gt;12&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="metric-card"&gt;
+    &lt;span class="metric-title"&gt;In Progress&lt;/span&gt;
+    &lt;span class="metric-value highlight-progress"&gt;4&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="metric-card"&gt;
+    &lt;span class="metric-title"&gt;High Priority&lt;/span&gt;
+    &lt;span class="metric-value highlight-alert"&gt;3&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="metric-card"&gt;
+    &lt;span class="metric-title"&gt;Completed&lt;/span&gt;
+    &lt;span class="metric-value highlight-done"&gt;5&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/section&gt;
+
+&lt;!-- Refactored Task Creation Modal Form inside #task-modal --&gt;
+&lt;form class="modal-form"&gt;
+  &lt;div class="form-group area-title"&gt;
+    &lt;label for="task-title"&gt;Task Title&lt;/label&gt;
+    &lt;input type="text" id="task-title" name="title" placeholder="e.g., Implement JWT Auth" required /&gt;
+  &lt;/div&gt;
+
+  &lt;div class="form-group area-category"&gt;
+    &lt;label for="task-category"&gt;Category&lt;/label&gt;
+    &lt;select id="task-category" name="category"&gt;
+      &lt;option value="frontend"&gt;Frontend&lt;/option&gt;
+      &lt;option value="backend"&gt;Backend&lt;/option&gt;
+      &lt;option value="database"&gt;Database&lt;/option&gt;
+      &lt;option value="devops"&gt;DevOps&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class="form-group area-priority"&gt;
+    &lt;label for="task-priority"&gt;Priority&lt;/label&gt;
+    &lt;select id="task-priority" name="priority"&gt;
+      &lt;option value="low"&gt;Low&lt;/option&gt;
+      &lt;option value="medium" selected&gt;Medium&lt;/option&gt;
+      &lt;option value="high"&gt;High&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+
+  &lt;div class="form-group area-desc"&gt;
+    &lt;label for="task-desc"&gt;Description&lt;/label&gt;
+    &lt;textarea id="task-desc" name="description" rows="4" placeholder="Task details..."&gt;&lt;/textarea&gt;
+  &lt;/div&gt;
+
+  &lt;div class="form-actions area-actions"&gt;
+    &lt;button type="button" class="btn-secondary" onclick="document.getElementById('task-modal').style.display='none'"&gt;Cancel&lt;/button&gt;
+    &lt;button type="submit" class="btn-primary"&gt;Save Task&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;</code></pre>
+
+      <h3>Step 2: Update CSS Grid Architecture (<code>styles.css</code>)</h3>
+      <p>Append and update the CSS rules in <code>styles.css</code> to build the summary grid and refactor the form layout:</p>
+
+      <pre><code>/* ==========================================================================
+   1. DASHBOARD SUMMARY GRID (2D Explicit Tracks & Fractional Units)
+   ========================================================================== */
+.dashboard-summary {
+  width: 100%;
+  display: grid;
+  /* 4 explicit equal columns using fractional units */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background-color: #ffffff;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #dfe1e6;
+  box-shadow: 0 2px 4px rgba(9, 30, 66, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #172b4d;
+}
+
+.highlight-progress { color: #0052cc; }
+.highlight-alert    { color: #de350b; }
+.highlight-done     { color: #00875a; }
+
+/* Adjust main board layout container to stack summary above columns */
+.kanban-board {
+  display: flex;
+  flex-direction: column; /* Stack summary on top, columns below */
+  gap: 1.5rem;
+  padding: 1.5rem;
+  overflow-x: auto;
+  min-height: calc(100vh - 75px);
+}
+
+.board-columns-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* ==========================================================================
+   2. REFACTORED MODAL FORM (CSS Grid Template Areas)
+   ========================================================================== */
+.modal-form {
+  display: grid;
+  /* 2 equal columns */
+  grid-template-columns: 1fr 1fr;
+  /* Visual named area layout mapping */
+  grid-template-areas:
+    "title    title"
+    "category priority"
+    "desc     desc"
+    "actions  actions";
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+/* Map Form Groups to Named Areas */
+.area-title    { grid-area: title; }
+.area-category { grid-area: category; }
+.area-priority { grid-area: priority; }
+.area-desc     { grid-area: desc; }
+.area-actions  { grid-area: actions; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #172b4d;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 0.6rem;
+  border: 1px solid #dfe1e6;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background-color: #fafbfc;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4c9aff;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(76, 154, 255, 0.2);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f4f5f7;
+}
+
+.btn-secondary {
+  background-color: #ebecf0;
+  color: #172b4d;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: #dfe1e6;
+}</code></pre>
+
+      <h3>Step 3: Code Walkthrough & Debugging Notes</h3>
+      <ol>
+        <li><strong>Why <code>grid-template-areas</code> simplifies multi-column forms:</strong> By explicitly declaring <code>"title title"</code> and <code>"desc desc"</code>, the Title and Description inputs automatically stretch across both columns without requiring brittle cell-spanning rules like <code>grid-column: span 2</code>. Category and Priority sit cleanly side-by-side because they are assigned to <code>category</code> and <code>priority</code> in the second row string.</li>
+        <li><strong>The Fractional Advantage:</strong> <code>grid-template-columns: repeat(4, 1fr)</code> dynamically recalculates widget widths on screen resize while maintaining strict <code>1rem</code> gaps. No percentages with manual margins required!</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Build a standalone <strong>Multi-Widget Analytics Dashboard Panel</strong> for our board sidebar using <code>grid-template-areas</code>. The panel must display 3 widgets structured according to the following named ASCII layout:</p>
+
+      <div class="diagram">
++-------------------------------------------------------------+
+| MULTI-WIDGET ANALYTICS PANEL                                |
+|                                                             |
+| +---------------------------------------------------------+ |
+| | "velocity"  (Spans full top row)                        | |
+| +------------------------------------+--------------------+ |
+| | "burndown"  (Left 2/3 width)       | "members" (1/3)    | |
+| +------------------------------------+--------------------+ |
++-------------------------------------------------------------+
+      </div>
+
+      <h3>Requirements:</h3>
+      1. Container uses <code>display: grid</code> with <code>grid-template-columns: 2fr 1fr</code>.
+      2. Uses <code>grid-template-areas</code> with two explicit rows: <code>"velocity velocity"</code> and <code>"burndown members"</code>.
+      3. Set a <code>gap: 1rem</code> gutter spacing.
+
+      <h3>Solution Code</h3>
+
+      <p><strong>HTML Snippet:</strong></p>
+      <pre><code>&lt;div class="analytics-widget-panel"&gt;
+  &lt;div class="widget-card area-velocity"&gt;
+    &lt;h4&gt;Sprint Velocity&lt;/h4&gt;
+    &lt;p&gt;34 Story Points Completed (Sprint 14)&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;div class="widget-card area-burndown"&gt;
+    &lt;h4&gt;Burndown Status&lt;/h4&gt;
+    &lt;p&gt;On track to complete active sprint by Friday.&lt;/p&gt;
+  &lt;/div&gt;
+
+  &lt;div class="widget-card area-members"&gt;
+    &lt;h4&gt;Active Team&lt;/h4&gt;
+    &lt;p&gt;5 Members Online&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+      <p><strong>CSS Snippet:</strong></p>
+      <pre><code>/* Analytics Panel Solution */
+.analytics-widget-panel {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-areas:
+    "velocity velocity"
+    "burndown members";
+  gap: 1rem;
+  background-color: #f4f5f7;
+  padding: 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #dfe1e6;
+}
+
+.area-velocity { grid-area: velocity; }
+.area-burndown { grid-area: burndown; }
+.area-members  { grid-area: members; }
+
+.widget-card {
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(9, 30, 66, 0.1);
+}
+
+.widget-card h4 {
+  font-size: 0.9rem;
+  color: #172b4d;
+  margin-bottom: 0.25rem;
+}
+
+.widget-card p {
+  font-size: 0.8rem;
+  color: #5e6c84;
+}</code></pre>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>CSS Grid is a **two-dimensional layout engine** that simultaneously manages row and column placement.</li>
+        <li>The **Fractional Unit (<code>fr</code>)** calculates proportional space distribution after subtracting fixed gaps and lengths.</li>
+        <li><code>grid-template-areas</code> provides a highly readable visual syntax for mapping UI layouts.</li>
+        <li>Use **CSS Grid for Macro-Layouts** (page shells, dashboard grids, multi-column forms) and **Flexbox for Micro-Layouts** (buttons, nav bars, avatar rows).</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>In what scenarios would you choose <code>grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))</code> over a fixed <code>repeat(4, 1fr)</code> grid?</em></li>
+        <li><em>How does the browser calculate cell widths when mixing fixed pixel lengths (e.g., <code>200px</code>) with fractional units (e.g., <code>1fr 2fr</code>) in `grid-template-columns`?</em></li>
+        <li><em>What happens to an element assigned to a <code>grid-area</code> name that does not exist in the container's <code>grid-template-areas</code> string?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Responsive Masonry-Style Board Overview Gallery</h3>
+      <p>Construct a multi-widget board gallery section that automatically reflows cards using responsive CSS Grid rules without writing media queries.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Create a container <code>&lt;section class="board-gallery-grid"&gt;</code> containing 6 project card widgets.</li>
+        <li>Configure the container using <code>display: grid</code>.</li>
+        <li>Use <code>grid-template-columns</code> with <code>repeat()</code>, <code>auto-fill</code>, and <code>minmax(280px, 1fr)</code> to create a responsive matrix that automatically wraps cards onto new rows as the viewport shrinks.</li>
+        <li>Set a <code>gap</code> of <code>1.25rem</code>.</li>
+        <li>Apply custom card styling with subtle hover lift transforms (<code>transform: translateY(-2px)</code>).</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your HTML and CSS changes to your branch: <code>feature/grid-architecture</code>.</li>
+        <li>Verify in browser DevTools that shrinking the viewport causes grid tracks to fluidly wrap without triggering horizontal scrollbars.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
