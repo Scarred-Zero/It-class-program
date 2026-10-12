@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 3, Session 9: Responsive Web Design & Breakpoints - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 3: Session 9</div>
+      <h1>Responsive Web Design & Breakpoints</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIL PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>Over the past two sessions, we mastered the core engines of modern layout architecture: <strong>CSS Flexbox</strong> (for one-dimensional directional alignment) and <strong>CSS Grid</strong> (for two-dimensional coordinate tracks and templates). However, a web application layout that looks pristine on a 1920x1080 desktop monitor often collapses, overflows, or becomes entirely unusable when viewed on a mobile smartphone (320px wide) or a tablet device (768px wide).</p>
+
+      <p>In modern full-stack software engineering, applications are accessed across an infinite spectrum of screen dimensions. <strong>Responsive Web Design (RWD)</strong> is the engineering discipline that ensures our user interfaces adapt fluidly to any viewing environment. Rather than building separate codebases for mobile and desktop, we utilize the viewports meta configuration, fluid percentage/fractional units, and conditional styling blocks known as <strong>Media Queries</strong>.</p>
+
+      <div class="diagram">
+DESKTOP VIEW (1200px+)                 TABLET VIEW (768px)          MOBILE VIEW (320px)
++-----------------------+              +-------------------+        +-------------------+
+| [Navbar]              |              | [Navbar]          |        | [Hamburger Menu]  |
+| Col1 | Col2 | Col3    |  ==>         | Col1 | Col2       |  ==>   | [Column: To Do]   |
+| (4 Columns Side-by-Side)             | (2 Columns Grid)  |        | (Stacked Vertically)|
++-----------------------+              +-------------------+        +-------------------+
+      </div>
+
+      <p>In this session, we will adopt the industry-standard <strong>Mobile-First Design Philosophy</strong> to refactor our <strong>Agile Task Board</strong> capstone project, ensuring flawless rendering across mobile, tablet, and desktop viewports.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - RESPONSIVE ARCHITECTURE & TECHNICAL STANDARDS -->
+    <section>
+      <h2>2. Theory: Responsive Web Standards & Architecture</h2>
+
+      <h3>2.1 The Viewport Meta Tag</h3>
+      <p>Before any responsive CSS can function correctly, the browser must be instructed how to scale the document canvas relative to device screens. This is achieved via the HTML viewport meta tag in the document <code>&lt;head&gt;</code>:</p>
+
+      <pre><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code></pre>
+
+      <p>Without this declaration, mobile browsers render web pages at a default desktop width (usually around 980px) and zoom out to fit the screen, resulting in microscopic, unreadable text and horizontal scrolling bugs.</p>
+
+      <h3>2.2 The Mobile-First Design Philosophy</h3>
+      <p>Historically, developers used a <em>Desktop-First</em> approach, writing styles for large screens first and using <code>max-width</code> media queries to strip away features for smaller screens. Modern engineering mandates <strong>Mobile-First Design</strong>:</p>
+      <ul>
+        <li><strong>Base CSS (Mobile First):</strong> Write your primary stylesheet assuming the narrowest mobile device (320px–480px). Elements stack vertically, typography is compact, and layouts are single-column.</li>
+        <li><strong>Progressive Enhancement (`min-width`):</strong> Use media queries to introduce multi-column grids, horizontal navigation bars, and complex desktop features only as screen real estate expands.</li>
+      </ul>
+
+      <pre><code>/* MOBILE-FIRST CSS STRUCTURE */
+/* 1. Base styles apply to mobile devices by default */
+.kanban-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* 2. Tablet breakpoint enhancement */
+@media (min-width: 768px) {
+  .kanban-board {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 3. Desktop breakpoint enhancement */
+@media (min-width: 1024px) {
+  .kanban-board {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+}</code></pre>
+
+      <h3>2.3 Standard Breakpoint Conventions</h3>
+      <p>While responsive design should respond to content reflow rather than specific device models, industry standards recognize the following min-width breakpoint thresholds:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Breakpoint Token</th>
+            <th>Min-Width Rule</th>
+            <th>Target Device Class</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Mobile Small</strong></td>
+            <td><code>0px – 480px</code></td>
+            <td>Smartphones (iPhone SE, Galaxy S series portrait)</td>
+          </tr>
+          <tr>
+            <td><strong>Tablet / iPad</strong></td>
+            <td><code>min-width: 768px</code></td>
+            <td>Tablets, iPads, large foldables, landscape phones</td>
+          </tr>
+          <tr>
+            <td><strong>Laptop / Desktop</strong></td>
+            <td><code>min-width: 1024px</code></td>
+            <td>Standard laptops, desktop workstations</td>
+          </tr>
+          <tr>
+            <td><strong>Widescreen</strong></td>
+            <td><code>min-width: 1440px</code></td>
+            <td>High-resolution widescreen monitors</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will continue development directly within our <code>agile-task-board</code> repository, establishing a dedicated Git feature branch for responsive design engineering.</p>
+
+      <h3>Step 1: Branch Creation</h3>
+      <p>Open your terminal in VS Code and create a new branch:</p>
+      <pre><code>cd agile-task-board
+git status
+git checkout -b feature/responsive-breakpoints</code></pre>
+
+      <h3>Step 2: Device Toolbar Emulation</h3>
+      <ol>
+        <li>Launch your project using VS Code <strong>Live Server</strong>.</li>
+        <li>Open Chrome Developer Tools (<code>F12</code>).</li>
+        <li>Click the <strong>Toggle Device Toolbar</strong> icon (or press <code>Ctrl+Shift+M</code> / <code>Cmd+Shift+M</code>).</li>
+        <li>Set the device dimension dropdown to test across <strong>iPhone SE (320px)</strong>, <strong>iPad Mini (768px)</strong>, and <strong>Responsive Desktop (1200px+)</strong>.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will now refactor our <code>styles.css</code> stylesheet using a mobile-first philosophy. On mobile devices, our Kanban board columns will stack vertically with full width. On tablet viewports (768px+), columns will transition into a 2x2 grid. On desktop viewports (1024px+), they will expand into our classic horizontal scrolling row.</p>
+
+      <h3>Step 1: Implementing Mobile-First Responsive Styles</h3>
+      <p>Open <code>styles.css</code> and append the following media query enhancements:</p>
+
+      <pre><code>/* ==========================================================================
+   RESPONSIVE WEB DESIGN & BREAKPOINT MEDIA QUERIES (Mobile-First)
+   ========================================================================== */
+
+/* 1. Base Mobile Styles (0px to 767px) */
+.app-header {
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.navbar ul {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kanban-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1rem;
+  height: auto; /* Allow natural page scrolling on mobile */
+  overflow-x: visible;
+}
+
+.kanban-column {
+  width: 100% !important; /* Force columns to fill mobile screen width */
+  max-height: none;
+}
+
+.modal-dialog {
+  width: 90% !important;
+  padding: 1.25rem;
+  margin: 1rem;
+}
+
+.modal-form {
+  grid-template-columns: 1fr !important; /* Stack form inputs vertically on mobile */
+  grid-template-areas:
+    "title"
+    "category"
+    "priority"
+    "desc"
+    "actions" !important;
+}
+
+
+/* 2. Tablet Breakpoint (min-width: 768px) */
+@media (min-width: 768px) {
+  .app-header {
+    flex-direction: row;
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+  }
+
+  .navbar ul {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  /* Transition Kanban columns into a 2x2 Grid on tablets */
+  .kanban-board {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .kanban-column {
+    width: 100% !important;
+  }
+
+  .modal-form {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-areas:
+      "title    title"
+      "category priority"
+      "desc     desc"
+      "actions  actions" !important;
+  }
+}
+
+
+/* 3. Desktop / Laptop Breakpoint (min-width: 1024px) */
+@media (min-width: 1024px) {
+  .kanban-board {
+    display: flex;
+    flex-direction: row; /* Horizontal flex row for Kanban columns */
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 2rem;
+    overflow-x: auto;
+    height: calc(100vh - 75px);
+  }
+
+  .kanban-column {
+    flex: 0 0 350px !important; /* Fixed 350px width per column */
+    max-height: 100%;
+  }
+
+  .modal-dialog {
+    width: 500px !important;
+  }
+}</code></pre>
+
+      <h3>Step 2: Architectural Walkthrough & Debugging Notes</h3>
+      <ol>
+        <li><strong>Overriding Rigidity with <code>!important</code> in Media Queries:</strong> When transitioning components built with fixed inline or desktop-first dimensions (such as <code>width: 350px</code> on <code>.kanban-column</code>), media queries require explicit overrides to ensure mobile screens are not forced into horizontal overflow.</li>
+        <li><strong>Fluid Modal Widths:</strong> On mobile screens, setting <code>width: 90%</code> with automatic margins prevents modal popup dialogs from colliding with mobile device bezel borders.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Refactor the dashboard summary metrics cards container (built in Session 8) to be fully responsive using a mobile-first approach.</p>
+      <ul>
+        <li><strong>Mobile (0px – 767px):</strong> Stack the 4 metric cards into a single vertical column (1 column).</li>
+        <li><strong>Tablet (768px – 1023px):</strong> Display the cards in a 2x2 grid (2 columns).</li>
+        <li><strong>Desktop (1024px+):</strong> Display all 4 cards side-by-side in a single row (4 columns).</li>
+      </ul>
+
+      <h3>Solution Code</h3>
+      <pre><code>/* Classwork Solution: Responsive Dashboard Summary Grid */
+
+/* Mobile Base (1 Column) */
+.dashboard-summary {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Tablet Enhancement (2 Columns) */
+@media (min-width: 768px) {
+  .dashboard-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop Enhancement (4 Columns) */
+@media (min-width: 1024px) {
+  .dashboard-summary {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}</code></pre>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>Responsive Web Design relies on viewport meta configuration, fluid sizing units, and conditional media queries.</li>
+        <li>The <strong>Mobile-First Design Philosophy</strong> ensures lean stylesheets by designing for narrow screens first and progressively enhancing layouts for larger viewports via <code>min-width</code> queries.</li>
+        <li>Combining Flexbox and Grid across breakpoints allows macro container layouts to transform seamlessly from stacked columns to multi-column grids and horizontal scroll views.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>Why is writing `min-width` media queries generally considered superior to maintaining legacy `max-width` desktop-first stylesheets?</em></li>
+        <li><em>What exact rendering failure occurs on smartphones if the viewport meta tag is omitted from `index.html`?</em></li>
+        <li><em>How do CSS Grid units like `repeat(auto-fit, minmax(280px, 1fr))` reduce the absolute reliance on manual media query breakpoints?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Mobile Touch Target & Activity Drawer Optimization</h3>
+      <p>Optimize mobile usability for the Agile Task Board project by adapting touch targets and the slide-out activity drawer for small screens.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li><strong>Activity Drawer Mobile Fullscreen:</strong> Write a media query for screens under <code>768px</code> that forces the <code>.activity-drawer</code> width to occupy <code>100vw</code> (full screen width) instead of the desktop 300px width.</li>
+        <li><strong>Touch Target Padding:</strong> Ensure all interactive buttons (such as <code>.btn-primary</code>, <code>.btn-icon</code>, and modal close triggers) have a minimum padding of <code>0.75rem 1rem</code> on mobile viewports to prevent mis-clicks on touchscreens.</li>
+        <li><strong>Task Card Text Wrapping:</strong> Verify that long task titles and descriptions wrap cleanly (`word-break: break-word`) inside cards on narrow 320px screens.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your responsive updates to your Git feature branch: <code>feature/responsive-breakpoints</code>.</li>
+        <li>Test across iPhone SE and iPad viewports in Chrome DevTools to verify zero horizontal overflow bugs exist.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
