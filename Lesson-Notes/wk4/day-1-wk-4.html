@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 4, Session 10: CSS Variables & Dark Mode Theming - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 4: Session 10</div>
+      <h1>CSS Variables & Dark Mode Theming</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>Over the first three weeks of our program, we successfully built the structural layout of our <strong>Agile Task Board</strong> capstone project using semantic HTML5, CSS Box Model rules, Flexbox, Grid, and responsive media queries. However, if you examine our current <code>styles.css</code> file, you will notice hardcoded color codes (such as <code>#0052cc</code>, <code>#f4f5f7</code>, <code>#172b4d</code>) scattered across dozens of individual rules. Managing a growing application with hardcoded values leads to maintenance nightmares, inconsistent color palettes, and massive refactoring overhead.</p>
+
+      <p>In modern production-grade software engineering, styling is governed by <strong>Design Tokens</strong>—centralized variables that store design decisions such as colors, typography scales, spacing units, and shadow elevations. <strong>CSS Custom Properties (CSS Variables)</strong> provide native browser support for implementing design tokens at runtime.</p>
+
+      <div class="diagram">
+TRADITIONAL HARDCODED STYLING            CSS VARIABLES / DESIGN TOKENS
++--------------------------------+       +--------------------------------+
+| .card { background: #ffffff; } |       | :root { --bg-surface: #fff; }  |
+| .modal { background: #ffffff;} |       | .card  { background: var(--bg);} |
+| .navbar { background: #ffffff;} |       | .modal { background: var(--bg);} |
+| (Changing theme requires 100 edits)    | (Changing theme requires 1 edit) |
++--------------------------------+       +--------------------------------+
+      </div>
+
+      <p>By leveraging CSS variables, developers can instantly unlock <strong>Dynamic Theme Switching (Dark Mode)</strong> with minimal code. Instead of overriding hundreds of individual CSS rules for dark mode, we simply swap out our semantic design token values on the root container when a user toggles themes.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - SEMANTIC WEB & DESIGN TOKENS -->
+    <section>
+      <h2>2. Theory: CSS Variables & Design Token Architecture</h2>
+
+      <h3>2.1 Anatomy of Custom Properties</h3>
+      <p>A CSS variable is defined using a double-hyphen prefix (<code>--</code>) and accessed using the <code>var()</code> function. Custom properties obey standard CSS cascade, inheritance, and specificity rules, making them vastly superior to preprocessor variables (like Sass or LESS variables) which are static and compiled away.</p>
+
+      <pre><code>/* Definition on the root pseudo-class */
+:root {
+  --color-primary: #0052cc;
+  --spacing-base: 1rem;
+}
+
+/* Consumption across selectors */
+.btn-primary {
+  background-color: var(--color-primary);
+  padding: var(--spacing-base);
+}</code></pre>
+
+      <h3>2.2 The Two-Tier Design Token Strategy</h3>
+      <p>Professional engineering systems organize design tokens into two distinct tiers to maintain clean architecture:</p>
+      <ul>
+        <li><strong>Tier 1: Primitive Tokens (Global Palette):</strong> Raw, immutable color or measurement values that describe the core brand palette (e.g., <code>--blue-500: #0052cc</code>, <code>--neutral-100: #f4f5f7</code>).</li>
+        <li><strong>Tier 2: Semantic / Functional Tokens:</strong> Purpose-driven variables that describe where or how a token is used (e.g., <code>--bg-canvas: var(--neutral-100)</code>, <code>--text-main: var(--neutral-900)</code>).</li>
+      </ul>
+
+      <p>When implementing dark mode, your components should <em>never</em> reference primitive tokens directly. Instead, components reference semantic tokens. To switch to dark mode, you only redefine the semantic token values under a dark theme data attribute.</p>
+
+      <h3>2.3 Implementing Runtime Theme Switching</h3>
+      <p>We can control theme switches cleanly by attaching a data attribute to the HTML root element (e.g., <code>&lt;html data-theme="dark"&gt;</code>) and writing scoped variable overrides:</p>
+
+      <pre><code>/* Light Theme (Default Root Tokens) */
+:root {
+  --bg-canvas: #f4f5f7;
+  --bg-surface: #ffffff;
+  --text-main: #172b4d;
+  --border-color: #dfe1e6;
+}
+
+/* Dark Theme Override */
+[data-theme="dark"] {
+  --bg-canvas: #0f172a;
+  --bg-surface: #1e293b;
+  --text-main: #f8fafc;
+  --border-color: #334155;
+}</code></pre>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will continue development directly inside our <code>agile-task-board</code> repository. Before refactoring our stylesheet, let's establish a dedicated Git feature branch.</p>
+
+      <h3>Step 1: Create a Feature Branch</h3>
+      <p>Open your terminal in VS Code and execute the following commands:</p>
+      <pre><code>cd agile-task-board
+git status
+git checkout -b feature/css-variables-theming</code></pre>
+
+      <h3>Step 2: Inspecting Current Styles</h3>
+      <ol>
+        <li>Open your project directory in Visual Studio Code: <code>code .</code></li>
+        <li>Open <code>styles.css</code> and review our current hardcoded color values. In this session, we will systematically replace these static values with centralized CSS design tokens.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will refactor our entire stylesheet to use CSS Custom Properties and implement a functional dark mode theme toggle for our Agile Task Board project.</p>
+
+      <h3>Step 1: Adding a Theme Toggle Button to HTML (<code>index.html</code>)</h3>
+      <p>Update your <code>app-header</code> in <code>index.html</code> to include a theme switcher button next to the "+ New Task" button:</p>
+
+      <pre><code>&lt;header class="app-header"&gt;
+  &lt;div class="header-brand"&gt;
+    &lt;h1&gt;Agile Task Board&lt;/h1&gt;
+  &lt;/div&gt;
+  &lt;nav class="navbar"&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href="#"&gt;Home&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;Projects&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href="#"&gt;Settings&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/nav&gt;
+  &lt;div class="header-actions" style="display: flex; gap: 0.75rem; align-items: center;"&gt;
+    &lt;button class="btn-theme-toggle" id="theme-toggle-btn" aria-label="Toggle dark mode"&gt;🌓 Theme&lt;/button&gt;
+    &lt;button class="btn-primary" id="open-modal-btn" onclick="document.getElementById('task-modal').style.display = 'flex'"&gt;
+      + New Task
+    &lt;-- /button&gt;
+  &lt;/div&gt;
+&lt;/header&gt;</code></pre>
+
+      <h3>Step 2: Defining Design Tokens & Dark Theme in CSS (<code>styles.css</code>)</h3>
+      <p>Refactor the top of your <code>styles.css</code> to establish `:root` tokens and `[data-theme="dark"]` overrides, then replace hardcoded color values across your component rules:</p>
+
+      <pre><code>/* ==========================================================================
+   1. DESIGN TOKENS & CSS VARIABLES (Light & Dark Themes)
+   ========================================================================== */
+:root {
+  /* Primitive & Semantic Light Tokens */
+  --bg-canvas: rgb(55, 73, 75);
+  --bg-surface: #ffffff;
+  --bg-column: #f4f5f7;
+  --text-main: #172b4d;
+  --text-muted: #5e6c84;
+  --border-color: #dfe1e6;
+  --primary-color: #0052cc;
+  --primary-hover: #0747a6;
+  --accent-btn: #ffab00;
+  --card-shadow: 0 4px 5px rgba(9, 30, 66, 0.9);
+  --modal-bg: rgba(4, 28, 44, 0.54);
+  --drawer-bg: rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] {
+  /* Semantic Dark Tokens */
+  --bg-canvas: #0b0f19;
+  --bg-surface: #1e293b;
+  --bg-column: #111827;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --accent-btn: #f59e0b;
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --modal-bg: rgba(2, 6, 23, 0.8);
+  --drawer-bg: rgba(15, 23, 42, 0.9);
+}
+
+/* ==========================================================================
+   2. GLOBAL RESET & BASE STYLES USING TOKENS
+   ========================================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-canvas);
+  color: var(--text-main);
+  padding: 0 1rem;
+  min-height: 150vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.navbar ul li a {
+  text-decoration: none;
+  outline: none;
+  color: var(--accent-btn);
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background-color: var(--accent-btn);
+  color: #172b4d;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-theme-toggle {
+  background-color: transparent;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.5rem 0.75rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-theme-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.kanban-column {
+  display: flex;
+  background-color: var(--bg-column);
+  color: var(--text-main);
+  width: 350px;
+  border-radius: 8px;
+  max-height: 100%;
+  flex-direction: column;
+  padding: 1rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+}
+
+.task-card {
+  position: relative;
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.column-header h2 {
+  font-size: 1.2rem;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--modal-bg);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-dialog {
+  position: relative;
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+}
+
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  padding: 0.6rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.activity-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 100vh;
+  padding: 1rem;
+  background-color: var(--drawer-bg);
+  backdrop-filter: blur(8px);
+  color: var(--text-main);
+  border-radius: 8px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 900;
+}</code></pre>
+
+      <h3>Step 3: Wire up Theme Switching JavaScript (Inline / App Script)</h3>
+      <p>To make our theme switcher functional right away before we dive deep into full JavaScript modules in upcoming sessions, add this lightweight vanilla JS script right before the closing <code>&lt;/body&gt;</code> tag in <code>index.html</code>:</p>
+
+      <pre><code>&lt;script&gt;
+  const themeToggleBtn = document.getElementById('theme-toggle-btn');
+  const htmlRoot = document.documentElement;
+
+  themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = htmlRoot.getAttribute('data-theme');
+    if (currentTheme === 'dark') {
+      htmlRoot.removeAttribute('data-theme');
+    } else {
+      htmlRoot.setAttribute('data-theme', 'dark');
+    }
+  });
+&lt;/script&gt;</code></pre>
+
+      <div class="callout">
+        <div class="callout-title">💡 Debugging & Engineering Insight</div>
+        <p>By shifting all color declarations to CSS variables, adding dark mode required zero new CSS layout rules. We simply toggled a <code>data-theme="dark"</code> attribute on the root <code>&lt;html&gt;</code> element, and the browser automatically re-evaluated every <code>var(--token)</code> in the DOM tree instantly!</p>
+      </div>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Tokenize the priority indicator badges and category tags in your CSS stylesheet so that their background and text colors adapt automatically when switching between light and dark modes.</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>Define new semantic tokens in `:root` and `[data-theme="dark"]` for priority high (e.g., `--badge-high-bg` and `--badge-high-text`).</li>
+        <li>Refactor the <code>.priority-indicator.high</code> and <code>.category-tag</code> classes in <code>styles.css</code> to use these variables instead of hardcoded hex colors.</li>
+      </ol>
+
+      <h3>Solution Code</h3>
+
+      <p><strong>CSS Additions:</strong></p>
+      <pre><code>/* Add to :root */
+:root {
+  --badge-high-bg: #fee2e2;
+  --badge-high-text: #b91c1c;
+  --tag-bg: #e0f2fe;
+  --tag-text: #0369a1;
+}
+
+/* Add to [data-theme="dark"] */
+[data-theme="dark"] {
+  --badge-high-bg: rgba(185, 28, 28, 0.2);
+  --badge-high-text: #fca5a5;
+  --tag-bg: rgba(3, 105, 161, 0.2);
+  --tag-text: #7dd3fc;
+}
+
+/* Refactored Component Rules */
+.priority-indicator.high {
+  background-color: var(--badge-high-bg);
+  color: var(--badge-high-text);
+}
+
+.category-tag {
+  background-color: var(--tag-bg);
+  color: var(--tag-text);
+}</code></pre>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>CSS Custom Properties (Variables) establish native, runtime design tokens that obey standard inheritance and cascading rules.</li>
+        <li>A two-tier design token architecture (primitive palette vs. semantic functional tokens) is essential for scalable theming.</li>
+        <li>Dynamic theme switching can be achieved cleanly with zero duplicate layout code by scoping token overrides under root attributes like <code>[data-theme="dark"]</code>.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>Why are native CSS Custom Properties superior to preprocessor variables (Sass/LESS) when implementing runtime theme toggling?</em></li>
+        <li><em>What is the architectural risk of applying primitive color tokens directly inside component CSS rules rather than semantic tokens?</em></li>
+        <li><em>How does the browser handle invalid variable values (e.g., assigning a color variable to a width property)?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Persistent Theme Preference with LocalStorage</h3>
+      <p>Prepare for our upcoming browser storage sessions by ensuring the dark mode theme choice persists when the user reloads the browser page.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Modify your inline theme toggle script in <code>index.html</code> so that when the user clicks the toggle button, their active theme choice is saved to browser `localStorage` (e.g., `localStorage.setItem('theme', 'dark')`).</li>
+        <li>On initial page load, write a synchronous script in the document <code>&lt;head&gt;</code> that checks <code>localStorage</code> for a saved theme preference and applies the <code>data-theme="dark"</code> attribute immediately before the page renders, preventing visual theme flashing.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your updated HTML and CSS files to your Git branch: <code>feature/css-variables-theming</code>.</li>
+        <li>Verify that refreshing the browser while in dark mode maintains the dark theme state seamlessly.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
