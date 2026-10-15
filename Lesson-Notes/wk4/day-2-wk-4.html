@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 4, Session 11: Static Cloud Deployment (Netlify) - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 4: Session 11[cite: 7]</div>
+      <h1>Static Cloud Deployment (Netlify)</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>Up to this point in our program, we have engineered and tested our <strong>Agile Task Board</strong> capstone project entirely within our local development environment using VS Code and Live Server. While running code locally is essential for active development and debugging, a web application holds zero real-world value if it remains trapped on a developer's local machine. To share our work with users, clients, and potential employers, our project must be published to the global cloud.</p>
+
+      <p>In modern full-stack software engineering, publishing code is no longer a manual process of uploading files via FTP. Instead, professional teams rely on <strong>Continuous Integration and Continuous Deployment (CI/CD) pipelines</strong>. A CI/CD pipeline automatically watches your version control repository (such as GitHub), detects new commits, builds the project assets, and deploys them instantly to global Content Delivery Networks (CDNs).</p>
+
+      <div class="diagram">
+LOCAL REPO                 GITHUB REMOTE               NETLIFY CDN (PRODUCTION)
++---------------+          +---------------+           +--------------------------+
+| git commit    | -------> | git push      | --------> | Automated Build Pipeline |
+| (Local Code)  |          | (Main Branch) |           | Global Edge Distribution |
++---------------+          +---------------+           +--------------------------+
+      </div>
+
+      <p>In this session, we will configure automated CI/CD deployment pipelines using Netlify and GitHub Pages, moving our front-end Agile Task Board from a local directory into a live, secure, production-accessible cloud environment[cite: 7].</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - SEMANTIC WEB & CI/CD PIPELINES -->
+    <section>
+      <h2>2. Theory: CI/CD Pipelines & Static Hosting Architecture</h2>
+
+      <h3>2.1 The Concept of Static Cloud Hosting</h3>
+      <p>Static hosting platforms (such as Netlify, Vercel, and GitHub Pages) specialize in serving immutable front-end assets—HTML, CSS, JavaScript, and static images—directly from high-performance edge servers located around the world. Because our client-side Agile Task Board runs entirely in the browser using HTML, CSS, and Vanilla JavaScript, it is a prime candidate for high-speed static cloud deployment.</p>
+
+      <h3>2.2 Automated Build & Deployment Workflows</h3>
+      <p>Modern cloud deployment platforms integrate directly with GitHub webhooks. The deployment lifecycle follows a rigorous four-stage pipeline:</p>
+      <ol>
+        <li><strong>Trigger:</strong> A developer pushes code changes to the production branch (e.g., `main`) on GitHub.</li>
+        <li><strong>Fetch & Build:</strong> Netlify spins up a secure Linux container, clones the repository, and executes any specified build or configuration commands.</li>
+        <li><strong>Deploy:</strong> Compiled assets are pushed to global CDN edge nodes, ensuring sub-second response times for users anywhere in the world.</li>
+        <li><strong>Atomic Rollback:</strong> Each deployment generates a unique, immutable deployment URL, allowing instant rollbacks if a bug is introduced.</li>
+      </ol>
+
+      <h3>2.3 Configuration Files: `netlify.toml`</h3>
+      <p>While Netlify can automatically detect basic directory structures, professional projects define their build instructions explicitly using a `netlify.toml` configuration file placed at the root of the repository. This file controls publish directories, redirect rules, and security headers.</p>
+
+      <pre><code># Sample netlify.toml configuration
+[build]
+  publish = "."       # Directory to publish (root folder containing index.html)
+  command = ""        # No build step required for vanilla HTML/CSS/JS
+
+[context.production.environment]
+  NODE_VERSION = "18"
+      </code></pre>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will prepare our <code>agile-task-board</code> repository for automated cloud deployment[cite: 7].</p>
+
+      <h3>Step 1: Verify Git Repository Status</h3>
+      <p>Ensure all your latest layout refactoring, CSS variables, dark mode code, and responsive media queries are committed and pushed to your remote GitHub repository:</p>
+      <pre><code>cd agile-task-board
+git status
+git add .
+git commit -m "feat: prepare project for cloud deployment"
+git push origin main</code></pre>
+
+      <h3>Step 2: Create a Netlify Account</h3>
+      <ol>
+        <li>Navigate to <a href="https://www.netlify.com" target="_blank">Netlify.com</a> and sign up or log in using your GitHub account credentials.</li>
+        <li>Grant Netlify authorized read/write access to your public and private GitHub repositories so it can establish automated CI/CD webhooks.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will now configure our project build settings and deploy our styled responsive dashboard and portfolio live on Netlify[cite: 7].</p>
+
+      <h3>Step 1: Create the `netlify.toml` Configuration File</h3>
+      <p>Create a new file named <code>netlify.toml</code> in the root directory of your project folder[cite: 9] and insert the explicit build rules:</p>
+
+      <pre><code># Netlify Configuration File for Agile Task Board
+[build]
+  # The directory where index.html is located relative to root
+  publish = "."
+  # No compilation command needed for vanilla web apps
+  command = ""
+
+# Security and caching headers for production
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = nosniff
+      </code></pre>
+
+      <h3>Step 2: Deploying via the Netlify Dashboard</h3>
+      <ol>
+        <li>In your Netlify dashboard, click the button labeled <strong>"Add new site"</strong> and select <strong>"Import an existing project"</strong>.</li>
+        <li>Choose <strong>Deploy with GitHub</strong> and select your <code>agile-task-board</code> repository.</li>
+        <li>Configure the site deployment settings:
+          <ul>
+            <li><strong>Branch to deploy:</strong> `main`</li>
+            <li><strong>Base directory:</strong> (Leave blank)</li>
+            <li><strong>Build command:</strong> (Leave blank)</li>
+            <li><strong>Publish directory:</strong> `.` (root directory)</li>
+          </ul>
+        </li>
+        <li>Click <strong>Deploy site</strong>. Netlify will instantly build your project and generate a live production URL (e.g., `https://rad-cannoli-abc123.netlify.app`).</li>
+      </ol>
+
+      <h3>Step 3: Configuring a Custom Subdomain</h3>
+      <ol>
+        <li>Go to your deployed site's settings in Netlify under <strong>Site configuration &gt; Domain management</strong>.</li>
+        <li>Click <strong>Change site name</strong> and rename your generated subdomain to a professional custom handle (e.g., `agile-task-board-chibuzor.netlify.app`).</li>
+      </ol>
+
+      <div class="callout">
+        <div class="callout-title">💡 Production Verification Insight</div>
+        <p>Once deployed, any future <code>git push origin main</code> command will automatically trigger a new build on Netlify within seconds. You can verify live production URL accessibility directly from your browser or mobile phone[cite: 7].</p>
+      </div>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Configure a Netlify redirect rules file (`_redirects`) to handle single-page application (SPA) routing gracefully, ensuring that any direct URL navigation or page reloads route back to `index.html` without triggering 404 Not Found errors.</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>Create a file named <code>_redirects</code> in your root project folder[cite: 9] (no file extension).</li>
+        <li>Add the catch-all redirect routing rule.</li>
+      </ol>
+
+      <h3>Solution Code</h3>
+      <pre><code># _redirects file content
+/*    /index.html   200
+      </code></pre>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>Continuous Integration and Continuous Deployment (CI/CD) pipelines automate the transition from local git commits to live global production environments.</li>
+        <li>Static cloud hosts like Netlify provide instant CDN edge distribution, atomic deployments, and automatic HTTPS security certificates for front-end web applications.</li>
+        <li>Configuration files such as <code>netlify.toml</code> and <code>_redirects</code> give software engineers precise control over build settings, security headers, and routing behavior.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>What is the primary operational advantage of automated CI/CD git-triggered deployments over manual FTP file uploads?</em></li>
+        <li><em>How does Netlify's atomic deployment architecture prevent users from experiencing broken or half-uploaded assets during a build update?</em></li>
+        <li><em>Why is a `_redirects` file essential when hosting client-side single-page applications on static cloud servers?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Production Verification & Deployment Audit[cite: 7]</h3>
+      <p>Re-deploy your revised code and verify live production URL accessibility across multiple devices[cite: 7].</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Make a minor visual update to your Agile Task Board project (e.g., update the sprint title or add a footer version tag).</li>
+        <li>Commit and push the update to your GitHub `main` branch[cite: 7].</li>
+        <li>Log into your Netlify dashboard to confirm that the automated CI/CD build completes successfully.</li>
+        <li>Open your live Netlify production URL on both your laptop browser and your mobile smartphone to verify that styles, dark mode toggles, and responsive breakpoints render identically to your local environment[cite: 7].</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Submit your active live Netlify production URL in your project repository README.md file.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)[cite: 1, 2, 7]</p>
+    </footer>
+  </div>
+
+</body>
+</html>
