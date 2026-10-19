@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 5, Session 13: Control Flow & Functions - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 5: Session 13</div>
+      <h1>Control Flow & Functions</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>In Session 12, we introduced vanilla JavaScript syntax, variable scoping rules (`let` vs `const`), and browser console debugging. While variable declarations allow us to store individual pieces of data, an application cannot make intelligent decisions or process collections of information without logic. <strong>Control Flow</strong> and <strong>Functions</strong> form the computational brain of any software system.</p>
+
+      <p>In our <strong>Agile Task Board</strong> capstone project, control flow structures (such as conditional branches and iterative loops) determine how tasks are filtered, categorized, and validated. Functions encapsulate this business logic into reusable, modular operations. Without these mechanisms, applications would be rigid and unable to respond dynamically to user input.</p>
+
+      <div class="diagram">
+INPUT DATA (Tasks Array) --------> CONTROL FLOW & FUNCTIONS --------> RENDERED UI STATE
++--------------------------+       +------------------------+       +---------------------+
+| [{ id: 1, priority: 'high' }     | - if/else conditions   |       | Filtered Task Cards |
+|  { id: 2, priority: 'low' }]     | - switch dispatchers   |       | Metric Counters     |
++--------------------------+       | - loops & arrow fns    |       | Validation Feedback |
+                                   +------------------------+       +---------------------+
+      </div>
+
+      <p>In this session, we will master JavaScript conditional structures (`if/else`, `switch`), iterative loops (`for`, `while`), and functional programming paradigms (traditional functions vs. modern ES6 arrow functions) to build robust task management routines.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - SEMANTIC WEB & LOGIC STANDARDS -->
+    <section>
+      <h2>2. Theory: Control Flow & Function Architecture</h2>
+
+      <h3>2.1 Conditional Branching: `if/else` and `switch`</h3>
+      <p>Conditional statements allow your program to execute different blocks of code depending on whether a boolean expression evaluates to true or false.</p>
+
+      <ul>
+        <li><strong>`if / else if / else` Statements:</strong> Ideal for evaluating complex ranges, multiple independent variables, or compound boolean logic (using `&&` and `||`).</li>
+        <li><strong>`switch` Statements:</strong> Designed for evaluating a single expression against multiple discrete matching cases. It utilizes `break` statements to prevent fall-through execution bugs.</li>
+      </ul>
+
+      <pre><code>/* Switch Statement Example: Task Priority Badge Dispatcher */
+function getPriorityBadgeClass(priorityLevel) {
+  switch (priorityLevel) {
+    case 'high':
+      return 'badge-danger';
+    case 'medium':
+      return 'badge-warning';
+    case 'low':
+      return 'badge-success';
+    default:
+      return 'badge-secondary';
+  }
+}
+      </code></pre>
+
+      <h3>2.2 Iteration and Loops: `for` and `while`</h3>
+      <p>When processing collections of data—such as iterating through our Kanban board task list—loops automate repetitive execution.</p>
+      <ul>
+        <li><strong>`for` Loop:</strong> The standard counter-controlled loop, perfect when you need precise control over the index iteration sequence (`for (let i = 0; i < array.length; i++)`).</li>
+        <li><strong>`for...of` Loop:</strong> A modern, readable ES6 loop specifically engineered for iterating directly over iterable objects like arrays.</li>
+        <li><strong>`while` Loop:</strong> Executes a block of code repeatedly as long as a specified condition evaluates to true. Use with caution to avoid infinite loop locks.</li>
+      </ul>
+
+      <h3>2.3 Traditional Functions vs. ES6 Arrow Functions</h3>
+      <p>JavaScript supports multiple ways to declare functions. Understanding their structural and semantic differences is critical for professional software engineering:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Traditional Function Declarations</th>
+            <th>ES6 Arrow Functions (`=>`)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Syntax</strong></td>
+            <td><code>function calculate(a, b) { return a + b; }</code></td>
+            <td><code>const calculate = (a, b) => a + b;</code></td>
+          </tr>
+          <tr>
+            <td><strong>Hoisting</strong></td>
+            <td><strong>Hoisted:</strong> Can be called before its definition line in the code.</td>
+            <td><strong>Not Hoisted:</strong> Must be declared before invocation.</td>
+          </tr>
+          <tr>
+            <td><strong>`this` Binding</strong></td>
+            <td>Has its own dynamic <code>this</code> context based on how it is called.</td>
+            <td>Lexical <code>this</code>: Inherits <code>this</code> from the surrounding enclosing scope.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will continue development inside our <code>agile-task-board</code> repository, establishing a dedicated Git branch for JavaScript control flow logic.</p>
+
+      <h3>Step 1: Create a Feature Branch</h3>
+      <p>Open your terminal in VS Code and execute the following Git commands:</p>
+      <pre><code>cd agile-task-board
+git status
+git checkout -b feature/js-control-flow</code></pre>
+
+      <h3>Step 2: Verification</h3>
+      <ol>
+        <li>Open your project directory in VS Code: <code>code .</code></li>
+        <li>Ensure your `js/app.js` file from Session 12 is present and linked correctly in `index.html`.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will now expand <code>js/app.js</code> by writing robust control flow algorithms and function modules that process our task dataset, evaluate priorities, and filter tasks dynamically.</p>
+
+      <h3>Step 1: Add Control Flow & Function Modules to `js/app.js`</h3>
+      <p>Open <code>js/app.js</code> and append the following comprehensive logic modules:</p>
+
+      <pre><code>/* ==========================================================================
+   AGILE TASK BOARD - CONTROL FLOW & FUNCTIONS (Session 13)
+   ========================================================================== */
+
+// Extended Mock Task Database
+const taskBoardDatabase = [
+  { id: 201, title: "Design ERD Schema", category: "database", priority: "high", status: "todo" },
+  { id: 202, title: "Configure FastAPI Router", category: "backend", priority: "medium", status: "in_progress" },
+  { id: 203, title: "Build Flexbox Navbar", category: "frontend", priority: "low", status: "done" },
+  { id: 204, title: "Setup Netlify CI/CD", category: "devops", priority: "high", status: "done" },
+  { id: 205, title: "Write Pydantic Schemas", category: "backend", priority: "high", status: "todo" }
+];
+
+// 1. Traditional Function with Switch Statement (Action Dispatcher)
+function getColumnNameByStatus(statusKey) {
+  switch (statusKey) {
+    case "todo":
+      return "To Do";
+    case "in_progress":
+      return "In Progress";
+    case "review":
+      return "Review";
+    case "done":
+      return "Done";
+    default:
+      return "Backlog";
+  }
+}
+
+// 2. ES6 Arrow Function for Priority Filtering (Implicit Return)
+const filterTasksByPriority = (tasksArray, targetPriority) => {
+  const filteredResults = [];
+  
+  // Traditional for...of loop for iteration
+  for (const task of tasksArray) {
+    if (task.priority === targetPriority) {
+      filteredResults.push(task);
+    }
+  }
+  
+  return filteredResults;
+};
+
+// 3. Conditional Metric Counter Function using If/Else branches
+function calculateBoardMetrics(tasksArray) {
+  let highPriorityCount = 0;
+  let completedCount = 0;
+  let activeCount = 0;
+
+  for (let i = 0; i < tasksArray.length; i++) {
+    const currentTask = tasksArray[i];
+
+    if (currentTask.priority === "high") {
+      highPriorityCount++;
+    }
+
+    if (currentTask.status === "done") {
+      completedCount++;
+    } else {
+      activeCount++;
+    }
+  }
+
+  return {
+    total: tasksArray.length,
+    highPriority: highPriorityCount,
+    completed: completedCount,
+    active: activeCount
+  };
+}
+
+// 4. Execution & Console Verification
+console.group("%c📊 Agile Task Board - Logic Execution Report", "color: #2563eb; font-weight: bold; font-size: 13px;");
+
+const highPriorityTasks = filterTasksByPriority(taskBoardDatabase, "high");
+console.log("Filtered High Priority Tasks:");
+console.table(highPriorityTasks);
+
+const computedMetrics = calculateBoardMetrics(taskBoardDatabase);
+console.log("Board Summary Metrics Object:");
+console.table(computedMetrics);
+
+console.log(`Status Key 'in_progress' maps to Column: ${getColumnNameByStatus("in_progress")}`);
+console.groupEnd();
+      </code></pre>
+
+      <h3>Step 2: Architectural Walkthrough & Debugging Notes</h3>
+      <ol>
+        <li><strong>Combining Loops and Conditionals:</strong> Notice how `calculateBoardMetrics` uses a standard counter `for` loop combined with `if/else` statements to inspect every task object in our dataset and increment statistics accurately.</li>
+        <li><strong>Arrow Function Conciseness:</strong> `filterTasksByPriority` demonstrates clean ES6 arrow syntax combined with a `for...of` loop, providing high readability when scanning collections.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Write an arrow function named <code>searchTasksByKeyword(tasksArray, keyword)</code> in <code>js/app.js</code> that searches through the task database and returns an array of tasks whose titles contain the specified keyword (case-insensitive).</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>Use an arrow function expression.</li>
+        <li>Iterate through the tasks using a `for...of` loop.</li>
+        <li>Convert both the task title and the search keyword to lowercase using `.toLowerCase()` before comparing them with `.includes()`.</li>
+      </ol>
+
+      <h3>Solution Code</h3>
+      <pre><code>/* Classwork Solution: Keyword Search Arrow Function */
+const searchTasksByKeyword = (tasksArray, keyword) => {
+  const matches = [];
+  const normalizedKeyword = keyword.toLowerCase();
+
+  for (const task of tasksArray) {
+    const normalizedTitle = task.title.toLowerCase();
+    
+    if (normalizedTitle.includes(normalizedKeyword)) {
+      matches.push(task);
+    }
+  }
+
+  return matches;
+};
+
+// Test the search function in the console
+const searchResult = searchTasksByKeyword(taskBoardDatabase, "schema");
+console.log("%cSearch Results for 'schema':", "color: #10b981; font-weight: bold;");
+console.table(searchResult);
+      </code></pre>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>Control flow structures (`if/else`, `switch`) enable programs to branch execution paths based on dynamic data conditions.</li>
+        <li>Iterative loops (`for`, `for...of`, `while`) allow efficient processing of multi-item datasets such as task lists and column arrays.</li>
+        <li>ES6 arrow functions provide concise syntax and lexical `this` binding, complementing traditional function declarations.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>What is the primary risk of omitting a `break` statement inside a JavaScript `switch` case block?</em></li>
+        <li><em>When would you choose a traditional function declaration over an arrow function in terms of code hoisting?</em></li>
+        <li><em>How does a `for...of` loop improve readability compared to a traditional counter-based `for` loop when working with arrays?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Dynamic Category Sorter & Counter</h3>
+      <p>Build a utility function that groups and counts tasks by their engineering category.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Write a function named <code>getCategoryTaskCounts(tasksArray)</code> using either traditional or arrow function syntax.</li>
+        <li>The function must iterate through the task database and return an object tracking how many tasks exist for each category (e.g., `{ frontend: 1, backend: 2, database: 1, devops: 1 }`).</li>
+        <li>Output the resulting summary object to the browser console using `console.table()`.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your updated JavaScript code to your Git feature branch: <code>feature/js-control-flow</code>.</li>
+        <li>Verify in your browser developer console that the category count object logs correctly without errors upon page reload.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
