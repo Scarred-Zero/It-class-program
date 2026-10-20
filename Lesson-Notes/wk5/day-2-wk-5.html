@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 5, Session 14: Arrays, Objects & JSON Data - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 5: Session 14</div>
+      <h1>Arrays, Objects & JSON Data</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>In Session 13, we explored control flow structures and functions to process decision logic and iterate through datasets. However, real-world software applications do not manage isolated primitive variables; they handle rich, structured entities. In our <strong>Agile Task Board</strong> project, a task is never just a simple string—it is a composite entity containing an ID, title, description, priority status, category tag, and assignee details. Furthermore, these individual tasks exist collectively within organized collections or lists.</p>
+
+      <p>Mastering <strong>Objects</strong>, <strong>Arrays</strong>, and <strong>JSON (JavaScript Object Notation)</strong> is fundamental to full-stack engineering. Objects model complex real-world entities using key-value pairs, arrays manage ordered lists of those entities, and JSON acts as the universal data serialization format bridging our client-side JavaScript interface with our Python FastAPI backend databases.</p>
+
+      <div class="diagram">
+JAVASCRIPT OBJECT & ARRAY STATE            JSON SERIALIZATION FORMAT (String)
++------------------------------------+     +----------------------------------+
+| const taskList = [                 |     | '{                               |
+|   {                                |     |   "id": 301,                     |
+|     id: 301,                       | ==> |   "title": "Setup DB",           |
+|     title: "Setup DB",             |     |   "priority": "high"             |
+|     priority: "high"               |     | }'                               |
+|   }                                |     | (Transferred over HTTP / API)    |
+| ];                                 |     +----------------------------------+
++------------------------------------+
+      </div>
+
+      <p>In this session, we will examine object literal structures, array mutation techniques, and JSON serialization protocols, applying them directly to manage our task board data state.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - TECHNICAL STANDARDS & DATA STRUCTURES -->
+    <section>
+      <h2>2. Theory: Technical Standards & Data Structures</h2>
+
+      <h3>2.1 Object Literals and Key-Value Structures</h3>
+      <p>An object is a collection of related data and functionality stored as key-value pairs. Keys (properties) are strings (or symbols), while values can be primitives, arrays, nested objects, or functions (methods).</p>
+
+      <pre><code>/* Object Literal Definition */
+const taskItem = {
+  id: 101,
+  title: "Implement JWT Authentication",
+  category: "backend",
+  priority: "high",
+  isCompleted: false,
+  metadata: {
+    author: "Chibuzor Kanu",
+    estimatedHours: 6
+  },
+  getSummary() {
+    return `${this.title} [${this.priority.toUpperCase()}]`;
+  }
+};
+
+// Property Access: Dot Notation vs Bracket Notation
+console.log(taskItem.title);          // "Implement JWT Authentication"
+console.log(taskItem["category"]);      // "backend"
+      </code></pre>
+
+      <h3>2.2 Array Mutation Methods</h3>
+      <p>Arrays in JavaScript are ordered lists of data items. To manage dynamic lists (such as adding, removing, or reordering tasks on our Kanban board), JavaScript provides powerful array methods:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Operation Type</th>
+            <th>Description & Behavior</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>push()</code></td>
+            <td>Mutating (End)</td>
+            <td>Appends one or more elements to the <strong>end</strong> of an array and returns the new length.</td>
+          </tr>
+          <tr>
+            <td><code>pop()</code></td>
+            <td>Mutating (End)</td>
+            <td>Removes the <strong>last</strong> element from an array and returns that removed element.</td>
+          </tr>
+          <tr>
+            <td><code>unshift()</code></td>
+            <td>Mutating (Start)</td>
+            <td>Adds one or more elements to the <strong>beginning</strong> of an array.</td>
+          </tr>
+          <tr>
+            <td><code>shift()</code></td>
+            <td>Mutating (Start)</td>
+            <td>Removes the <strong>first</strong> element from an array and returns it.</td>
+          </tr>
+          <tr>
+            <td><code>splice()</code></td>
+            <td>Mutating (Anywhere)</td>
+            <td>Adds, removes, or replaces elements at a specified index (e.g., `array.splice(index, 1)` deletes 1 item).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.3 JSON Serialization and Deserialization</h3>
+      <p>JavaScript Object Notation (JSON) is a lightweight, text-based data interchange format derived from JavaScript object syntax. Because networks and storage mechanisms (like `localStorage` or HTTP response bodies) cannot transmit live JavaScript memory objects directly, data must be serialized into a JSON string and deserialized back into objects.</p>
+
+      <ul>
+        <li><strong><code>JSON.stringify(value)</code>:</strong> Converts a JavaScript object or array into a JSON-formatted string.</li>
+        <li><strong><code>JSON.parse(text)</code>:</strong> Parses a JSON-formatted string and reconstructs it into a live JavaScript object or array.</li>
+      </ul>
+
+      <pre><code>/* JSON Serialization & Deserialization Workflow */
+const activeBoardState = [{ id: 1, title: "Refactor CSS", status: "todo" }];
+
+// Serialize to JSON string for storage or network transport
+const jsonString = JSON.stringify(activeBoardState);
+console.log(jsonString); // '[{"id":1,"title":"Refactor CSS","status":"todo"}]'
+
+// Deserialize back into live JavaScript array
+const restoredState = JSON.parse(jsonString);
+console.log(restoredState[0].title); // "Refactor CSS"
+      </code></pre>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will continue development inside our <code>agile-task-board</code> repository, establishing a dedicated Git branch for array and object management.</p>
+
+      <h3>Step 1: Create a Feature Branch</h3>
+      <p>Open your terminal in VS Code and execute the following Git commands:</p>
+      <pre><code>cd agile-task-board
+git status
+git checkout -b feature/js-arrays-objects</code></pre>
+
+      <h3>Step 2: Verification</h3>
+      <ol>
+        <li>Open your project directory in VS Code: <code>code .</code></li>
+        <li>Ensure your `js/app.js` script file is open and ready for expansion.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will now write an advanced task state manager in <code>js/app.js</code> utilizing object literals, array mutation methods (`push`, `splice`), and JSON serialization to simulate persistent task board operations.</p>
+
+      <h3>Step 1: Add Object & Array State Manager to `js/app.js`</h3>
+      <p>Open <code>js/app.js</code> and append the following comprehensive state management module:</p>
+
+      <pre><code>/* ==========================================================================
+   AGILE TASK BOARD - ARRAYS, OBJECTS & JSON STATE MANAGER (Session 14)
+   ========================================================================== */
+
+// 1. Task Board State Management Object
+const kanbanTaskManager = {
+  boardName: "Sprint 14 Core Board",
+  tasks: [
+    { id: 301, title: "Design PostgreSQL ERD", category: "database", priority: "high", status: "todo" },
+    { id: 302, title: "Build FastAPI Endpoints", category: "backend", priority: "medium", status: "in_progress" }
+  ],
+
+  // Method to add a new task object to the array (Mutation: push)
+  addNewTask(title, category, priority, status = "todo") {
+    const newTask = {
+      id: Date.now(), // Unique numeric timestamp ID
+      title: title.trim(),
+      category: category,
+      priority: priority,
+      status: status
+    };
+
+    this.tasks.push(newTask);
+    console.log(`%c[Success] Task added: "${newTask.title}"`, "color: #10b981; font-weight: bold;");
+    this.syncToStorage();
+    return newTask;
+  },
+
+  // Method to delete a task by ID using array searching and splice mutation
+  deleteTaskById(taskId) {
+    const index = this.tasks.findIndex(task => task.id === taskId);
+    
+    if (index !== -1) {
+      const removedTask = this.tasks.splice(index, 1)[0];
+      console.log(`%c[Deleted] Task removed: "${removedTask.title}"`, "color: #ef4444; font-weight: bold;");
+      this.syncToStorage();
+      return true;
+    }
+    
+    console.warn(`[Warning] Task ID ${taskId} not found for deletion.`);
+    return false;
+  },
+
+  // Method to serialize state to JSON string and save to localStorage simulation
+  syncToStorage() {
+    const serializedData = JSON.stringify(this.tasks);
+    localStorage.setItem("kanban_tasks_backup", serializedData);
+    console.log("%c[Storage] Board state serialized and synchronized.", "color: #2563eb;");
+  },
+
+  // Method to load and deserialize state from JSON storage
+  loadFromStorage() {
+    const rawData = localStorage.getItem("kanban_tasks_backup");
+    if (rawData) {
+      this.tasks = JSON.parse(rawData);
+      console.log("%c[Storage] Board state restored from JSON payload.", "color: #8b5cf6; font-weight: bold;");
+    }
+  }
+};
+
+// 2. Execution & Console Verification
+console.group("%c📦 Agile Task Board - State Manager Test", "color: #2563eb; font-weight: bold; font-size: 13px;");
+
+// Test adding a task
+kanbanTaskManager.addNewTask("Configure Alembic Migrations", "database", "high", "todo");
+
+// Display current task list in tabular format
+console.table(kanbanTaskManager.tasks);
+
+// Test JSON serialization output directly
+const exportedJsonPayload = JSON.stringify(kanbanTaskManager.tasks, null, 2);
+console.log("Exported JSON Payload String:\n", exportedJsonPayload);
+
+console.groupEnd();
+      </code></pre>
+
+      <h3>Step 2: Architectural Walkthrough & Debugging Notes</h3>
+      <ol>
+        <li><strong>Method Context (`this`):</strong> Inside the `kanbanTaskManager` object, using `this.tasks` ensures the methods operate directly on the object's internal array state.</li>
+        <li><strong>Using `splice()` for Deletions:</strong> `findIndex()` locates the exact numeric array index of the target task ID, and `splice(index, 1)` cleanly extracts and removes that single object from the array without leaving empty `undefined` slots (unlike the `delete` operator).</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Add a new method named <code>updateTaskStatus(taskId, newStatus)</code> to the <code>kanbanTaskManager</code> object in <code>js/app.js</code>.</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>The method must search for a task object matching the provided <code>taskId</code>.</li>
+        <li>If found, update its <code>status</code> property to <code>newStatus</code> and call <code>this.syncToStorage()</code>.</li>
+        <li>Test your method by updating task <code>301</code> status from <code>"todo"</code> to <code>"in_progress"</code> and logging the updated tasks table.</li>
+      </ol>
+
+      <h3>Solution Code</h3>
+      <pre><code>/* Classwork Solution: Object Method for Status Updates */
+
+// Add this method inside the kanbanTaskManager object definition:
+kanbanTaskManager.updateTaskStatus = function(taskId, newStatus) {
+  const targetTask = this.tasks.find(task => task.id === taskId);
+
+  if (targetTask) {
+    targetTask.status = newStatus;
+    console.log(`%c[Updated] Task #${taskId} status changed to "${newStatus}"`, "color: #d97706; font-weight: bold;");
+    this.syncToStorage();
+    return true;
+  }
+
+  console.error(`[Error] Task ID ${taskId} could not be found for status update.`);
+  return false;
+};
+
+// Test executing the status update method
+kanbanTaskManager.updateTaskStatus(301, "in_progress");
+console.table(kanbanTaskManager.tasks);
+      </code></pre>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>Objects model complex, structured entities using key-value pairs and encapsulated methods.</li>
+        <li>Array mutation methods (`push`, `pop`, `shift`, `unshift`, `splice`) provide precise control over ordered item collections.</li>
+        <li>JSON serialization (`JSON.stringify` and `JSON.parse`) is essential for converting complex JavaScript data structures into transferable strings for storage and API communication.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>What is the architectural difference between mutating an array in-place using `splice()` versus returning a new filtered array?</em></li>
+        <li><em>Why is `JSON.stringify()` required before saving complex objects into browser `localStorage`?</em></li>
+        <li><em>What happens during deserialization using `JSON.parse()` if the incoming string contains invalid JSON syntax?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Task Object Filter & JSON Export Utility</h3>
+      <p>Build a utility function that extracts tasks by category and generates an exportable JSON payload file simulation.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Write a function named <code>exportTasksByCategory(categoryName)</code> that queries the <code>kanbanTaskManager.tasks</code> array.</li>
+        <li>The function must filter all tasks matching the specified category and return a pretty-printed JSON string (using `JSON.stringify(filteredArray, null, 2)`).</li>
+        <li>Test your export function by calling it with <code>"database"</code> and logging the resulting JSON string to the console.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your updated JavaScript code to your Git feature branch: <code>feature/js-arrays-objects</code>.</li>
+        <li>Verify in your browser console that the exported JSON string outputs correctly with formatted indentation.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
