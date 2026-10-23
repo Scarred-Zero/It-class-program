@@ -3,6 +3,8 @@ import './strings.js'
 import './typeCasting.js'
 import './operators.js' 
 import './ifStatments.js' 
+import './functions.js'
+import './test.js'
 
 
 // Data types
