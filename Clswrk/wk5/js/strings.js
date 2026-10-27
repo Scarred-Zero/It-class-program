@@ -1,4 +1,4 @@
-//  Strings
+//   String ('Single Quotes' || "Double Quotes")
 
 
 const first = "John";

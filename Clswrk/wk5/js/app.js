@@ -5,6 +5,7 @@ import './operators.js'
 import './ifStatments.js' 
 import './functions.js'
 import './test.js'
+import './array.js'
 
 
 // Data types
@@ -30,3 +31,25 @@ const obj = {
 }; // Object
 
 // console.log(obj.height + "cm");
+
+// Global Variable
+const x = 5;
+let y = 67;
+y = 6;
+
+const userInput = "Balls";
+const users = ["Zoe", 'Victory', "Tinubu"]
+let ball1 = "Victory"
+var ball2 = "Zoe"
+const str = "Chibuzor"
+
+// Scoped variable
+function myNums() {
+    const result = x + y;
+    const x = 5;
+    const y = 6;
+    return (`x + y: `+ ( x + y));
+}
+
+// console.log(myNums());  // Scoped Variables
+// console.log("x + y:", x + y); // Scoped Variables
