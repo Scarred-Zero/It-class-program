@@ -21,6 +21,7 @@ const arr = [1, 2, 3, 4, 5];
 //     }
 // });
 
+
 // Updating the array using indices(index) position
 arr[0] = "BMW";
 arr[1] = "Volvo";

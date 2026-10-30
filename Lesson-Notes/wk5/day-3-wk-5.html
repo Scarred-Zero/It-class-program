@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 5, Session 15: Modern Array Methods - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 5: Session 15</div>
+      <h1>Modern Array Methods</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>Over Sessions 13 and 14, we explored control flow structures, object literals, array mutations, and JSON serialization. When processing lists of data using traditional loops (`for`, `for...of`), developers frequently write verbose boilerplate code to iterate through items, push results into temporary arrays, or calculate aggregate metrics. While functional, imperative loops obscure the *intent* of the code behind indexing variables and conditional branch checks.</p>
+
+      <p>Modern JavaScript embraces **functional programming paradigms** through **Higher-Order Array Methods** (`map`, `filter`, `reduce`, `find`, and `some`). These methods accept callback functions as arguments, allowing software engineers to declare *what* transformation or evaluation should happen rather than manually managing *how* the loop iterates step-by-step.</p>
+
+      <div class="diagram">
+IMPERATIVE APPROACH (For Loop)                 FUNCTIONAL APPROACH (Higher-Order Methods)
++----------------------------------------+     +----------------------------------------+
+| const results = [];                    |     | const results = tasks                  |
+| for (let i = 0; i < tasks.length; i++) { |     |   .filter(t => t.status === 'todo')    |
+|   if (tasks[i].status === 'todo') {    |     |   .map(t => t.title);                  |
+|     results.push(tasks[i].title);      |     +----------------------------------------+
+|   }                                    |     | * Declarative, concise, highly readable|
+| }                                      |     +----------------------------------------+
++----------------------------------------+
+      </div>
+
+      <p>In our <strong>Agile Task Board</strong> project, these methods are the primary engine for rendering dynamic views: filtering tasks by status columns, searching records, transforming object datasets into HTML string templates, and aggregating sprint metrics.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - TECHNICAL STANDARDS & HIGHER-ORDER METHODS -->
+    <section>
+      <h2>2. Theory: Higher-Order Array Methods Architecture</h2>
+
+      <h3>2.1 Core Functional Array Methods</h3>
+      <p>Each higher-order method serves a distinct architectural purpose in front-end state management:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Return Type</th>
+            <th>Architectural Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>map()</code></td>
+            <td>New Array (Same Length)</td>
+            <td>Transforms every element in an array through a callback function (e.g., transforming task objects into HTML strings).</td>
+          </tr>
+          <tr>
+            <td><code>filter()</code></td>
+            <td>New Array (Subset)</td>
+            <td>Evaluates a boolean test on each element, returning only items that pass (e.g., extracting tasks where `status === "todo"`).</td>
+          </tr>
+          <tr>
+            <td><code>find()</code></td>
+            <td>Single Element / Undefined</td>
+            <td>Locates and returns the <strong>first</strong> element that satisfies a test condition (e.g., finding a task by unique ID).</td>
+          </tr>
+          <tr>
+            <td><code>some()</code></td>
+            <td>Boolean (`true` / `false`)</td>
+            <td>Checks if <strong>at least one</strong> element in the array passes a test condition (e.g., checking if any high-priority task is unassigned).</td>
+          </tr>
+          <tr>
+            <td><code>reduce()</code></td>
+            <td>Single Value (Any Type)</td>
+            <td>Accumulates array elements down into a single cumulative value—such as a number, string, or summary object (e.g., calculating total completed points).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.2 Method Chaining Architecture</h3>
+      <p>Because methods like <code>map()</code>, <code>filter()</code>, and <code>reduce()</code> return new arrays or values without mutating the original source array, they can be chained together sequentially to execute complex data pipelines in a single, highly readable statement.</p>
+
+      <pre><code>/* Method Chaining Example: Extract titles of all high-priority 'todo' tasks */
+const highPriorityTodoTitles = kanbanTaskManager.tasks
+  .filter(task => task.priority === "high")
+  .filter(task => task.status === "todo")
+  .map(task => task.title);
+      </code></pre>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will continue development inside our <code>agile-task-board</code> repository, establishing a dedicated Git feature branch for modern array method engineering.</p>
+
+      <h3>Step 1: Create a Feature Branch</h3>
+      <p>Open your terminal in VS Code and execute the following Git commands:</p>
+      <pre><code>cd agile-task-board
+git status
+git checkout -b feature/js-modern-array-methods</code></pre>
+
+      <h3>Step 2: Verification</h3>
+      <ol>
+        <li>Open your project directory in VS Code: <code>code .</code></li>
+        <li>Ensure your `js/app.js` script file is open and ready for expansion.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will now expand <code>js/app.js</code> by implementing robust data processing pipelines using `map`, `filter`, `find`, `some`, and `reduce` to manage our Kanban task dataset and generate dynamic HTML template strings.</p>
+
+      <h3>Step 1: Add Modern Array Methods to `js/app.js`</h3>
+      <p>Open <code>js/app.js</code> and append the following functional data processing module:</p>
+
+      <pre><code>/* ==========================================================================
+   AGILE TASK BOARD - MODERN ARRAY METHODS PIPELINE (Session 15)
+   ========================================================================== */
+
+// Extended Task Dataset for Functional Processing
+const sprintTaskRepository = [
+  { id: 401, title: "Design PostgreSQL ERD Schema", category: "database", priority: "high", status: "todo", points: 5 },
+  { id: 402, title: "Implement FastAPI Auth Router", category: "backend", priority: "high", status: "in_progress", points: 8 },
+  { id: 403, title: "Build Flexbox Navigation Bar", category: "frontend", priority: "low", status: "done", points: 3 },
+  { id: 404, title: "Configure Netlify Deployment", category: "devops", priority: "medium", status: "done", points: 2 },
+  { id: 405, title: "Write Pydantic Validation Models", category: "backend", priority: "high", status: "todo", points: 5 }
+];
+
+// 1. FILTER: Extract tasks belonging to a specific Kanban column status
+const getTasksByStatus = (tasks, targetStatus) => {
+  return tasks.filter(task => task.status === targetStatus);
+};
+
+// 2. FIND: Locate a single task object by its unique numeric ID
+const findTaskById = (tasks, searchId) => {
+  return tasks.find(task => task.id === searchId);
+};
+
+// 3. SOME: Check if there are any uncompleted high-priority tasks requiring immediate attention
+const hasUrgentPendingTasks = (tasks) => {
+  return tasks.some(task => task.priority === "high" && task.status !== "done");
+};
+
+// 4. REDUCE: Aggregate total story points across the entire sprint repository
+const calculateTotalStoryPoints = (tasks) => {
+  return tasks.reduce((accumulator, currentTask) => {
+    return accumulator + currentTask.points;
+  }, 0);
+};
+
+// 5. MAP: Transform task objects into HTML template strings for DOM injection
+const renderTaskCardTemplate = (task) => {
+  return `
+    <article class="task-card" data-id="${task.id}">
+      <div class="priority-indicator ${task.priority}">${task.priority.toUpperCase()}</div>
+      <header class="task-card-header">
+        <span class="category-tag">${task.category.toUpperCase()}</span>
+      </header>
+      <h3 class="task-title">${task.title}</h3>
+      <footer class="task-card-footer">
+        <span class="task-points">Points: ${task.points}</span>
+      </footer>
+    </article>
+  `;
+};
+
+// Generate an array of HTML cards for all 'todo' tasks using map and filter chaining
+const todoCardHtmlArray = sprintTaskRepository
+  .filter(task => task.status === "todo")
+  .map(task => renderTaskCardTemplate(task));
+
+// 6. Execution & Console Verification
+console.group("%c⚡ Agile Task Board - Functional Array Pipeline Report", "color: #2563eb; font-weight: bold; font-size: 13px;");
+
+console.log("Todo Status Tasks:");
+console.table(getTasksByStatus(sprintTaskRepository, "todo"));
+
+console.log("Found Task ID 402:");
+console.log(findTaskById(sprintTaskRepository, 402));
+
+console.log(`Are there urgent pending high-priority tasks? ${hasUrgentPendingTasks(sprintTaskRepository)}`);
+
+console.log(`Total Sprint Story Points (Accumulated via reduce): ${calculateTotalStoryPoints(sprintTaskRepository)}`);
+
+console.log("Generated HTML Templates for Todo Tasks:");
+console.log(todoCardHtmlArray.join(""));
+
+console.groupEnd();
+      </code></pre>
+
+      <h3>Step 2: Architectural Walkthrough & Debugging Notes</h3>
+      <ol>
+        <li><strong>Immutability & Pure Functions:</strong> Methods like `filter`, `map`, and `reduce` do not alter `sprintTaskRepository`. They return brand new structures, preventing unpredictable side-effects across our application state.</li>
+        <li><strong>The Initial Value in `reduce`:</strong> Notice the comma and `0` at the end of the `.reduce()` call (`}, 0)`); this sets the starting accumulator value to numeric zero. Omitting an initial value on an empty array throws a runtime TypeError.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Write an arrow function named <code>getCompletedTaskTitles(tasks)</code> in <code>js/app.js</code> that uses method chaining with <code>filter</code> and <code>map</code> to return an array containing only the titles of tasks whose status is <code>"done"</code>.</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>Use an arrow function expression.</li>
+        <li>Chain `.filter()` to isolate completed tasks.</li>
+        <li>Chain `.map()` to extract just the `title` string property.</li>
+        <li>Log the resulting array of strings to the console.</li>
+      </ol>
+
+      <h3>Solution Code</h3>
+      <pre><code>/* Classwork Solution: Method Chaining Filter & Map */
+const getCompletedTaskTitles = (tasks) => {
+  return tasks
+    .filter(task => task.status === "done")
+    .map(task => task.title);
+};
+
+// Test executing the chained function
+const completedTitles = getCompletedTaskTitles(sprintTaskRepository);
+console.log("%cCompleted Task Titles:", "color: #10b981; font-weight: bold;");
+console.log(completedTitles);
+      </code></pre>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>Higher-order array methods (`map`, `filter`, `reduce`, `find`, `some`) offer declarative, functional alternatives to imperative loops.</li>
+        <li>`map()` transforms elements 1-to-1 into a new array; `filter()` extracts a subset of elements matching a boolean condition.</li>
+        <li>`find()` returns the first matching element, while `some()` evaluates whether any element passes a test condition returning a boolean.</li>
+        <li>`reduce()` accumulates items down into a single cumulative output value.</li>
+        <li>Method chaining enables clean, readable data processing pipelines without mutating source state.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>What is the fundamental difference in return output between `map()` and `filter()` when executed on an array of 5 items?</em></li>
+        <li><em>Why is passing an initial value (like `0` or `{}`) crucial when invoking the `reduce()` method?</em></li>
+        <li><em>When would you choose `find()` over `filter()` in a task management application?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Aggregate Sprint Metrics Generator via `reduce`</h3>
+      <p>Build an advanced metrics generator function using `reduce` that compiles a comprehensive sprint report object from our task repository.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Write a function named <code>generateSprintSummaryReport(tasksArray)</code>.</li>
+        <li>Using `reduce`, iterate through the tasks to accumulate a summary object containing: total task count, total points, completed points count, and a breakdown count of tasks per status (e.g., `{ todo: 2, in_progress: 1, done: 2 }`).</li>
+        <li>Log the resulting summary report object to the console using `console.table()`.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your updated JavaScript code to your Git feature branch: <code>feature/js-modern-array-methods</code>.</li>
+        <li>Verify in your browser console that the accumulated metrics report object logs correctly without errors upon page reload.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
