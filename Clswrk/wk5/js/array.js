@@ -21,7 +21,6 @@ const arr = [1, 2, 3, 4, 5];
 //     }
 // });
 
-
 // Updating the array using indices(index) position
 arr[0] = "BMW";
 arr[1] = "Volvo";
@@ -31,8 +30,8 @@ arr[4] = "Porsche";
 
 const lengthCount = arr.length;
 const indexCount = arr.length - 1;
-console.log("The length of the array is:",lengthCount);
-console.log("The index count of the array is:",indexCount);
+console.log("The length of the array is:", lengthCount);
+console.log("The index count of the array is:", indexCount);
 
 // Methods in Array => push(), pop(), unshift(), shift(), splice().
 
@@ -97,12 +96,33 @@ const json = {
 };
 
 const activeBoardState = [
-    { id: 1, title: "Refactor CSS", status: "todo" }, // object
-    { id: 2, title: "Refactor HTML", status: "todo" }, // object
-    { id: 3, title: "Refactor JS", status: "in_progress" }, // object
+    {
+        id: 1,
+        title: "Refactor CSS",
+        status: "todo",
+        priority: "high",
+        points: 5,
+        assignedTo: "Xero Bot",
+    }, // object
+    {
+        id: 2,
+        title: "Refactor HTML",
+        status: "todo",
+        priority: "medium",
+        points: 3,
+        assignedTo: null,
+    }, // object
+    {
+        id: 3,
+        title: "Refactor JS",
+        status: "in_progress",
+        priority: "low",
+        points: 10,
+        assignedTo: null,
+    }, // object
 ];
 // Serialize to JSON string
-const jsonString = JSON.stringify(activeBoardState);
+const jsonString = JSON.stringify(activeBoardState, null, 2);
 console.log(jsonString);
 // Deserialize JSON string to an object
 const restoredState = JSON.parse(jsonString);
@@ -110,3 +130,47 @@ console.log(restoredState);
 console.log(restoredState[0].title);
 console.log(restoredState[1].title);
 console.log(restoredState[2].title);
+
+// Higher-Order Array Methods Architecture
+
+// map() => Transforms every element in an array through a callback function (e.g., transforming task objects into HTML strings). It returns a new array of the same length as the original array.
+// Example:
+const taskTitles = activeBoardState.map((task) => task.title);
+console.log(taskTitles);
+
+// filter() => Evaluates a boolean test on each element, returning only items that pass (e.g., extracting tasks where `status === "todo"`). It returns a new array containing only the elements that satisfy the condition.
+// Example:
+const todoTasks = activeBoardState.filter((task) => task.status === "todo");
+console.log(todoTasks);
+
+// find() => Locates and returns the first element that satisfies a test condition (e.g., finding a task by unique ID). It returns the first matching element or `undefined` if no match is found.
+// Example:
+const taskById = activeBoardState.find((task) => task.id === 2);
+console.log(taskById);
+
+// some() => Checks if at least one element in the array passes a test condition (e.g., checking if any high-priority task is unassigned). It returns `true` if at least one element satisfies the condition, otherwise `false`.
+// Example:
+const hasUnassignedTasks = activeBoardState.some(
+    (task) => task.assignedTo === null,
+);
+console.log(hasUnassignedTasks);
+
+// reduce() => Accumulates array elements down into a single cumulative value — such as a number, string, or summary object (e.g., calculating total completed points). It returns a single value that results from the accumulation of all elements in the array based on the provided reducer function.
+// reduce() processes each task and combines its points into one total.
+// `total` is the running sum; `task` is the current object in activeBoardState.
+// `total + task.points` is the updated sum for this task.
+// The final `0` is the starting value of `total`.
+// Example:
+const totalPoints = activeBoardState.reduce(
+    (total, task) => total + task.points,
+    0,
+);
+// Print the final sum stored in totalPoints.
+console.log(totalPoints);
+
+//  Method Chaining Architecture
+// List the titles of unassigned tasks
+const unassignedTask = activeBoardState
+    .filter((task) => task.assignedTo === null)
+    .map((task) => task);
+console.log(unassignedTask);
