@@ -102,7 +102,7 @@ const activeBoardState = [
         status: "todo",
         priority: "high",
         points: 5,
-        assignedTo: "Xero Bot",
+        assignee: "Xero Bot",
     }, // object
     {
         id: 2,
@@ -110,7 +110,7 @@ const activeBoardState = [
         status: "todo",
         priority: "medium",
         points: 3,
-        assignedTo: null,
+        assignee: "Lord-Zeus",
     }, // object
     {
         id: 3,
@@ -118,7 +118,23 @@ const activeBoardState = [
         status: "in_progress",
         priority: "low",
         points: 10,
-        assignedTo: null,
+        assignee: "Marcus",
+    }, // object
+    {
+        id: 4,
+        title: "Refactor PHP",
+        status: "done",
+        priority: "medium",
+        points: 6,
+        assignee: "",
+    }, // object
+    {
+        id: 5,
+        title: "Implement Balls",
+        status: "in_progress",
+        priority: "high",
+        points: 9,
+        assignee: "",
     }, // object
 ];
 // Serialize to JSON string
@@ -131,7 +147,7 @@ console.log(restoredState[0].title);
 console.log(restoredState[1].title);
 console.log(restoredState[2].title);
 
-// Higher-Order Array Methods Architecture
+// Higher-Order Array Methods Architecture - .map(), .filter(), .find(), .findIndex(), .some(), .reduce().
 
 // map() => Transforms every element in an array through a callback function (e.g., transforming task objects into HTML strings). It returns a new array of the same length as the original array.
 // Example:
@@ -148,10 +164,21 @@ console.log(todoTasks);
 const taskById = activeBoardState.find((task) => task.id === 2);
 console.log(taskById);
 
+// findIndex() => Identifies the index of the first element that meets a test condition (e.g., finding the index of a task with a specific title). It returns the index of the first matching element or `-1` if no match is found.
+// Example:
+const taskIndex = activeBoardState.findIndex((task) =>
+    task.title === "Refactor JS"
+);
+console.log(taskIndex);
+
+if (taskIndex !== -1) {
+    console.log(`Task found at index: ${taskIndex}`);
+}
+
 // some() => Checks if at least one element in the array passes a test condition (e.g., checking if any high-priority task is unassigned). It returns `true` if at least one element satisfies the condition, otherwise `false`.
 // Example:
 const hasUnassignedTasks = activeBoardState.some(
-    (task) => task.assignedTo === null,
+    (task) => task.assignee === null || task.assignee === "",
 );
 console.log(hasUnassignedTasks);
 
@@ -161,16 +188,12 @@ console.log(hasUnassignedTasks);
 // `total + task.points` is the updated sum for this task.
 // The final `0` is the starting value of `total`.
 // Example:
-const totalPoints = activeBoardState.reduce(
-    (total, task) => total + task.points,
-    0,
-);
+const totalPoints = activeBoardState.reduce((total, task) => total * task.points, 2);
+
 // Print the final sum stored in totalPoints.
 console.log(totalPoints);
 
 //  Method Chaining Architecture
 // List the titles of unassigned tasks
-const unassignedTask = activeBoardState
-    .filter((task) => task.assignedTo === null)
-    .map((task) => task);
+const unassignedTask = activeBoardState.filter((task) => task.assignee === "").map((task) => task);
 console.log(unassignedTask);
