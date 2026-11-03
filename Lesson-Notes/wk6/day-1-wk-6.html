@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 6, Session 16: Programmatic DOM Manipulation &amp; Event Handling</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 6: Session 16</div>
+      <h1>Selecting &amp; Modifying the DOM</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>Over the first five weeks of our program, we laid a robust foundation for our <strong>Agile Task Board</strong>. We structured our markup using semantic HTML5, built dynamic layouts using Flexbox and Grid, configured runtime themes with CSS custom properties, and constructed an in-memory data management pipeline using ES modules, arrays, objects, and local storage persistence. However, up to this point, our data state and our visual user interface have operated in parallel rather than as an integrated unit.</p>
+
+      <p>The <strong>Document Object Model (DOM)</strong> is the bridge that connects JavaScript data models to user-visible web interfaces. When a web browser loads <code>dist/index.html</code>, it parses the HTML text into an in-memory tree of live objects. Programmatic DOM manipulation is the practice of inspecting, creating, modifying, and deleting these nodes dynamically using JavaScript.</p>
+
+      <div class="diagram">
+APPLICATION STATE (Data Layer)              DOCUMENT OBJECT MODEL (View Layer)
++------------------------------------+      +----------------------------------------+
+| dist/assets/js/database/mockDb.js  |      | dist/assets/js/dom/script.js           |
+|                                    |      |                                        |
+| const tasks = [                    | ===> | document.querySelector('.task-list')   |
+|   { id: 101, title: 'Auth Fix' }   |      | element.textContent = task.title;      |
+| ];                                 |      | column.appendChild(taskCardElement);   |
++------------------------------------+      +----------------------------------------+
+      </div>
+
+      <p>In modern web engineering, direct DOM manipulation must follow strict state-driven principles. Rather than arbitrarily editing HTML content across scattered scripts, changes to the DOM should cleanly reflect underlying updates in application data state. In our Kanban project architecture:</p>
+      <ul>
+        <li><code>dist/assets/js/database/mockDb.js</code> owns data storage, array mutation, and <code>localStorage</code> persistence.</li>
+        <li><code>dist/assets/js/utils/tasks.js</code> handles task operations and validation rules.</li>
+        <li><code>dist/assets/js/utils/calc.js</code> calculates board metrics (such as total tasks and active counts).</li>
+        <li><code>dist/assets/js/dom/script.js</code> owns reading DOM nodes, updating text/classes, and programmatically instantiating card elements.</li>
+        <li><code>dist/assets/js/app.js</code> serves as the application entry point, loading saved data and triggering DOM initialization.</li>
+      </ul>
+
+      <p>In this session, we will master selector queries, safe node construction, class list toggles, and state-driven rendering pipelines to bridge our JavaScript task models directly to our Kanban board UI.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - SEMANTIC WEB & DOM APIS -->
+    <section>
+      <h2>2. Theory: Semantic Web &amp; DOM APIs</h2>
+
+      <h3>2.1 Element Selection: <code>querySelector</code> vs <code>querySelectorAll</code></h3>
+      <p>To interact with DOM elements, JavaScript provides modern selection APIs that accept standard CSS selector strings:</p>
+      <ul>
+        <li><code>document.querySelector(selector)</code>: Returns the <strong>first</strong> matching <code>Element</code> node in the document, or <code>null</code> if no match is found.</li>
+        <li><code>document.querySelectorAll(selector)</code>: Returns a static <code>NodeList</code> containing all matching elements. Unlike dynamic HTMLCollections, a static <code>NodeList</code> can be iterated over directly using <code>forEach()</code>.</li>
+      </ul>
+
+      <pre><code>// Target single column list container by ID or class
+const todoListContainer = document.querySelector('#todo-column .task-list');
+
+// Target all column headers on the board
+const columnHeaders = document.querySelectorAll('.column-header h2');
+columnHeaders.forEach(header => {
+  console.log(header.textContent);
+});</code></pre>
+
+      <h3>2.2 Text Updates: <code>textContent</code> vs <code>innerHTML</code></h3>
+      <p>Updating text nodes inside DOM elements requires strict adherence to security and performance standards:</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Parsing Behavior</th>
+            <th>Security &amp; Performance Profile</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>textContent</code></td>
+            <td>Treats input strictly as raw, unparsed plain text.</td>
+            <td><strong>Highly Safe &amp; Fast.</strong> Prevents Cross-Site Scripting (XSS) attacks by escaping all characters automatically. Preferred for user-supplied data (task titles, assignees).</td>
+          </tr>
+          <tr>
+            <td><code>innerHTML</code></td>
+            <td>Parses input string as full HTML markup, constructing new DOM nodes.</td>
+            <td><strong>High XSS Risk.</strong> If injected strings contain untrusted user inputs (e.g., <code>&lt;img src="x" onerror="stealCookies()"&gt;</code>), malicious scripts execute instantly. Use only for controlled static templates.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>2.3 Programmatic Node Creation &amp; Insertion</h3>
+      <p>Instead of concatenating raw HTML strings, production applications build component trees safely using explicit node creation APIs:</p>
+      <ul>
+        <li><code>document.createElement(tagName)</code>: Instantiates an unattached DOM element node in memory.</li>
+        <li><code>element.setAttribute(name, value)</code> / <code>element.dataset.id = value</code>: Assigns HTML attributes and HTML5 custom <code>data-*</code> attributes.</li>
+        <li><code>element.classList.add('className')</code> / <code>classList.toggle('active')</code>: Safely manages element CSS classes without overwriting existing tokens.</li>
+        <li><code>parentElement.appendChild(childNode)</code> / <code>parentElement.replaceChildren(...nodes)</code>: Inserts or resets child nodes inside a target parent container.</li>
+      </ul>
+
+      <div class="callout warning">
+        <div class="callout-title">⚠️ Accessibility Consideration (ARIA &amp; Screen Readers)</div>
+        <p>When programmatically updating dynamic UI regions—such as metric card counts or column item tallies—ensure screen readers announce the changes. Use appropriate ARIA attributes (e.g., <code>aria-live="polite"</code>) on containers whose text updates dynamically during runtime.</p>
+      </div>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will work directly within the existing project architecture inside the <code>dist/</code> workspace directory.</p>
+
+      <h3>Step 1: Verify Directory Structure</h3>
+      <p>Ensure your local project directory matches the established module hierarchy:</p>
+      <pre><code>agile-task-board/
+└── dist/
+    ├── index.html
+    └── assets/
+        ├── css/
+        │   └── styles.css
+        └── js/
+            ├── app.js
+            ├── database/
+            │   └── mockDb.js
+            ├── dom/
+            │   └── script.js
+            └── utils/
+                ├── calc.js
+                └── tasks.js</code></pre>
+
+      <h3>Step 2: Inspect Script Entry Point</h3>
+      <p>Verify that <code>dist/index.html</code> imports <code>app.js</code> as an ES Module using <code>type="module"</code> near the bottom of the document:</p>
+      <pre><code>&lt;script type="module" src="assets/js/app.js"&gt;&lt;/script&gt;</code></pre>
+
+      <h3>Step 3: Launch Local Preview</h3>
+      <p>Open <code>dist/index.html</code> using VS Code Live Server and launch Chrome Developer Tools (<code>F12</code>) to monitor the <strong>Console</strong> and <strong>Elements</strong> panels.</p>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will now build a state-driven DOM rendering module inside <code>dist/assets/js/dom/script.js</code>. This module will read task models from state, programmatically instantiate card nodes using safe APIs, render summary metrics, and cleanly update column containers.</p>
+
+      <h3>Step 1: Define Safe Task Card Element Creation (<code>dist/assets/js/dom/script.js</code>)</h3>
+      <p>Open <code>dist/assets/js/dom/script.js</code> and implement the card component factory function:</p>
+
+      <pre><code>/**
+ * Safely constructs a DOM task card element from a task data object.
+ * Uses createElement and textContent to prevent XSS vulnerabilities.
+ * 
+ * @param {Object} task - The task data model
+ * @returns {HTMLElement} The constructed article element node
+ */
+export function createTaskCardElement(task) {
+  // 1. Create root article element
+  const card = document.createElement('article');
+  card.className = 'task-card';
+  card.dataset.id = task.id;
+
+  // 2. Create priority badge dot
+  const priorityIndicator = document.createElement('div');
+  priorityIndicator.className = `priority-indicator ${task.priority.toLowerCase()}`;
+  priorityIndicator.textContent = task.priority.toUpperCase();
+
+  // 3. Create header row with category tag and option button
+  const header = document.createElement('header');
+  header.className = 'task-card-header';
+
+  const categoryTag = document.createElement('span');
+  categoryTag.className = 'category-tag';
+  categoryTag.textContent = task.category.toUpperCase();
+
+  const optionsBtn = document.createElement('button');
+  optionsBtn.className = 'btn-icon';
+  optionsBtn.setAttribute('aria-label', 'Task options');
+  optionsBtn.textContent = '⋮';
+
+  header.appendChild(categoryTag);
+  header.appendChild(optionsBtn);
+
+  // 4. Create task title heading
+  const titleHeading = document.createElement('h3');
+  titleHeading.className = 'task-title';
+  titleHeading.textContent = task.title;
+
+  // 5. Create footer with assignee details
+  const footer = document.createElement('footer');
+  footer.className = 'task-card-footer';
+
+  const assigneeSpan = document.createElement('span');
+  assigneeSpan.className = 'task-assignee';
+  assigneeSpan.textContent = `Assignee: ${task.assignee || 'Unassigned'}`;
+
+  footer.appendChild(assigneeSpan);
+
+  // 6. Assemble complete card hierarchy
+  card.appendChild(priorityIndicator);
+  card.appendChild(header);
+  card.appendChild(titleHeading);
+  card.appendChild(footer);
+
+  return card;
+}</code></pre>
+
+      <h3>Step 2: Implement Board Column Rendering Pipeline (<code>dist/assets/js/dom/script.js</code>)</h3>
+      <p>Add the main column rendering function in <code>dist/assets/js/dom/script.js</code> to populate all four status columns ("todo", "in_progress", "review", "done"):</p>
+
+      <pre><code>/**
+ * Clears and renders all tasks into their respective board columns.
+ * 
+ * @param {Array} tasks - Array of task data objects from database state
+ */
+export function renderBoardColumns(tasks) {
+  const statuses = ['todo', 'in_progress', 'review', 'done'];
+
+  statuses.forEach(status => {
+    // Select column container by status data attribute or selector
+    const columnContainer = document.querySelector(`[data-status="${status}"] .task-list`);
+    
+    if (!columnContainer) {
+      console.warn(`Render warning: Column container for status '${status}' not found.`);
+      return;
+    }
+
+    // Filter tasks matching current column status
+    const matchingTasks = tasks.filter(task => task.status === status);
+
+    // Build document fragment for batch insertion (Optimizes DOM reflows)
+    const fragment = document.createDocumentFragment();
+
+    matchingTasks.forEach(task => {
+      const cardElement = createTaskCardElement(task);
+      fragment.appendChild(cardElement);
+    });
+
+    // Reset container contents safely and append fragment
+    columnContainer.replaceChildren(fragment);
+  });
+}</code></pre>
+
+      <h3>Step 3: Implement Dashboard Metrics DOM Updates (<code>dist/assets/js/dom/script.js</code>)</h3>
+      <p>Add the metrics renderer in <code>dist/assets/js/dom/script.js</code> using <code>textContent</code> to update summary cards safely:</p>
+
+      <pre><code>/**
+ * Updates summary metric card counts on the dashboard header.
+ * 
+ * @param {Object} metrics - Calculated metric metrics object from calc.js
+ */
+export function renderDashboardMetrics(metrics) {
+  const totalEl = document.querySelector('#metric-total');
+  const activeEl = document.querySelector('#metric-active');
+  const highEl = document.querySelector('#metric-high');
+  const completedEl = document.querySelector('#metric-completed');
+
+  if (totalEl) totalEl.textContent = metrics.total;
+  if (activeEl) activeEl.textContent = metrics.active;
+  if (highEl) highEl.textContent = metrics.highPriority;
+  if (completedEl) completedEl.textContent = metrics.completed;
+}</code></pre>
+
+      <h3>Step 4: Connect Rendering Engine in Entry Point (<code>dist/assets/js/app.js</code>)</h3>
+      <p>Open <code>dist/assets/js/app.js</code> and trigger rendering upon application startup:</p>
+
+      <pre><code>import { getSavedTasks } from './database/mockDb.js';
+import { calculateBoardMetrics } from './utils/calc.js';
+import { renderBoardColumns, renderDashboardMetrics } from './dom/script.js';
+
+// Application Initialization Sequence
+function initApp() {
+  console.log('🚀 Initializing Agile Task Board...');
+
+  // 1. Retrieve persistent task state
+  const tasks = getSavedTasks();
+
+  // 2. Compute current metrics
+  const metrics = calculateBoardMetrics(tasks);
+
+  // 3. Render DOM interface
+  renderBoardColumns(tasks);
+  renderDashboardMetrics(metrics);
+
+  console.log('✓ DOM Interface fully initialized from state.');
+}
+
+// Execute when DOM tree is fully parsed
+document.addEventListener('DOMContentLoaded', initApp);</code></pre>
+
+      <h3>Step 5: Architectural Walkthrough &amp; Debugging Notes</h3>
+      <ol>
+        <li><strong>DocumentFragments for Batch Performance:</strong> Notice how `renderBoardColumns` uses <code>document.createDocumentFragment()</code>. Appending elements directly to the live DOM one-by-one triggers repeated layout reflows and repaints. Appending items to an off-screen fragment first and making a single <code>replaceChildren(fragment)</code> call executes a single, fast layout operation.</li>
+        <li><strong>Guarding Selection Targets:</strong> Checking <code>if (!columnContainer)</code> prevents null pointer runtime crashes if CSS selectors or HTML IDs change during future refactoring.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Write a standalone utility function named <code>highlightOverdueTasks(overdueTaskIds)</code> inside <code>dist/assets/js/dom/script.js</code>.</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>Use <code>document.querySelectorAll('.task-card')</code> to select all rendered card elements on the board.</li>
+        <li>Iterate through the elements and extract each card's <code>dataset.id</code>.</li>
+        <li>If the card's ID matches an ID in the passed <code>overdueTaskIds</code> array, use <code>classList.add('card-overdue')</code> to apply a visual highlight class. Otherwise, use <code>classList.remove('card-overdue')</code>.</li>
+        <li>Ensure no <code>innerHTML</code> strings are used.</li>
+      </ol>
+
+      <h3>Observable Acceptance Criteria:</h3>
+      <ul>
+        <li>Calling <code>highlightOverdueTasks([101, 103])</code> in the browser console applies the class <code>card-overdue</code> strictly to matching task cards in the DOM tree.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-title">Instructor Answer Key (Hidden from Student Materials)</div>
+        <pre><code>/**
+ * Highlights task cards matching overdue ID list.
+ * @param {Array&lt;number&gt;} overdueTaskIds - Array of task IDs
+ */
+export function highlightOverdueTasks(overdueTaskIds) {
+  const allCards = document.querySelectorAll('.task-card');
+
+  allCards.forEach(card =&gt; {
+    const cardId = Number(card.dataset.id);
+    if (overdueTaskIds.includes(cardId)) {
+      card.classList.add('card-overdue');
+    } else {
+      card.classList.remove('card-overdue');
+    }
+  });
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>The DOM is the browser's live, in-memory object representation of parsed HTML text.</li>
+        <li>Selection APIs (<code>querySelector</code>, <code>querySelectorAll</code>) link JavaScript logic to visual DOM nodes.</li>
+        <li>Always prefer <code>textContent</code> over <code>innerHTML</code> when handling user-provided strings to prevent XSS security vulnerabilities.</li>
+        <li>Safe component creation utilizes <code>createElement</code>, <code>classList</code>, and <code>appendChild</code> / <code>replaceChildren</code>.</li>
+        <li>DOM updates should be strictly state-driven, executing in response to underlying data changes.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>Why is passing user input directly into `innerHTML` considered a critical security flaw in production applications?</em></li>
+        <li><em>What performance advantage does a `DocumentFragment` provide when appending multiple dynamic nodes to a column container?</em></li>
+        <li><em>Why is it important to maintain separation between database state mutations (`mockDb.js`) and visual DOM rendering (`script.js`)?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Dynamic Empty Column State Indicators</h3>
+      <p>Extend <code>dist/assets/js/dom/script.js</code> to handle empty board column feedback programmatically.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Modify <code>renderBoardColumns(tasks)</code> in <code>dist/assets/js/dom/script.js</code>.</li>
+        <li>When a column has zero matching tasks (e.g., no tasks in "Review"), programmatically construct a placeholder <code>div</code> node with class <code>empty-column-message</code>.</li>
+        <li>Set its <code>textContent</code> safely to <code>"No tasks in this column"</code> and append it to the empty column list container.</li>
+        <li>Add CSS styling rule for <code>.empty-column-message</code> in <code>dist/assets/css/styles.css</code> to style the placeholder text centered with muted color tokens.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your updates to your feature branch: <code>feature/dom-selection-rendering</code>.</li>
+        <li>Verify in Chrome DevTools that emptying a column in state renders the safe placeholder message node instantly without console warnings.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
