@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 6, Session 17: Event Handling &amp; Listeners - Course Notes</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 6: Day 2 • Session 17</div>
+      <h1>Event Handling &amp; Listeners</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>In Session 16, we learned how to select elements and modify the Document Object Model (DOM) programmatically. We built functions like <code>createTaskCardElement()</code> and <code>renderBoardColumns()</code> to translate raw JavaScript task state from <code>dist/assets/js/database/mockDb.js</code> into visual HTML cards inside <code>dist/index.html</code>. However, our application interface remains purely reactive in one direction: it displays data, but it does not yet respond interactively when a user clicks buttons, toggles themes, opens modals, or selects task cards.</p>
+
+      <p><strong>Event Handling</strong> is the mechanism that breathes life into web applications by allowing JavaScript to listen for and respond to browser events—such as mouse clicks, keyboard presses, form submissions, and structural changes. Without event listeners, user interfaces are inert documents.</p>
+
+      <div class="diagram">
+USER INTERACTION (DOM Node)             EVENT PROPAGATION               UI EVENT LISTENER (Module)
++-----------------------------+         +---------------------+         +----------------------------+
+| Click on .task-card         | ------> | Bubbling Phase      | ----go> | dist/assets/js/dom/script.js|
+| or press Enter key          |         | (Target -> Root)    |         | board.addEventListener(...) |
++-----------------------------+         +---------------------+         +----------------------------+
+      </div>
+
+      <p>In our Agile Kanban Task Board architecture, event handling is strictly partitioned inside <code>dist/assets/js/dom/script.js</code> through UI initialization functions like <code>initializeUI()</code>. Rather than scattering inline event handlers (such as <code>onclick="..."</code>) across HTML markup—which violates separation of concerns and creates maintenance bottlenecks—we register robust, decoupled event listeners using modern JavaScript APIs.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - SEMANTIC WEB & TECHNICAL STANDARDS -->
+    <section>
+      <h2>2. Theory: Semantic Web &amp; Technical Standards</h2>
+
+      <h3>2.1 Registering Listeners with <code>addEventListener</code></h3>
+      <p>The industry standard method for registering event handlers is <code>element.addEventListener(type, listener, options)</code>. Unlike older inline attributes or property assignments (e.g., <code>element.onclick = ...</code>), <code>addEventListener</code> allows multiple independent listener callbacks to be attached to the same event type on a single element without overwriting previous handlers.</p>
+
+      <pre><code>// Clean modular listener registration
+const themeToggle = document.querySelector("#theme-toggle-btn");
+themeToggle?.addEventListener("click", (event) => {
+  // Handle theme switching logic
+});</code></pre>
+
+      <h3>2.2 Event Propagation: Bubbling and Target Identification</h3>
+      <p>When an event occurs on a DOM element (for example, clicking a title inside a task card), it does not just fire on that single element. DOM events travel through three distinct phases:</p>
+      <ol>
+        <li><strong>Capturing Phase:</strong> The event travels down from the root document object (`document`) to the target element.</li>
+        <li><strong>Target Phase:</strong> The event reaches the exact node where the interaction occurred.</li>
+        <li><strong>Bubbling Phase:</strong> The event bubbles back up from the target element through all its parent ancestors all the way to the root document.</li>
+      </ol>
+
+      <p>Understanding event bubbling is critical for managing performance in dynamic interfaces like our Kanban board.</p>
+
+      <h3>2.3 Event Delegation</h3>
+      <p>In our Kanban board, task cards are constantly destroyed, recreated, and re-rendered as tasks are added, updated, or moved across columns. If we attached individual event listeners directly to every single task card element upon creation, rendering performance would degrade, and any newly created cards would lack listeners unless explicitly rebound.</p>
+
+      <p><strong>Event Delegation</strong> is an architectural pattern where a single event listener is placed on a stable parent container (such as the board container `.board-columns-container`) to manage events triggered by its children. By inspecting <code>event.target</code> or using <code>Element.closest('.task-card')</code>, the parent listener efficiently catches and handles events bubbling up from any current or future child card.</p>
+
+      <pre><code>// Event Delegation pattern implemented in dist/assets/js/dom/script.js
+board?.addEventListener("click", (event) => {
+  const card = event.target.closest(".task-card");
+  if (!card || !board.contains(card)) return;
+
+  // Trigger activity drawer open state
+  activityDrawer?.classList.add("is-open");
+});</code></pre>
+
+      <h3>2.4 Keyboard Accessibility and Standard Events</h3>
+      <p>Professional web applications must be fully operable via both mouse pointers and keyboards. When building interactive components, listening solely to `click` events alienates keyboard users who navigate via `Tab` and trigger actions using `Enter` or `Spacebar`.</p>
+      <ul>
+        <li><code>click</code>: Fires on mouse clicks, touch taps, and programmatic activations.</li>
+        <li><code>keydown</code>: Fires when a key is pressed down. Developers must check <code>event.key === 'Enter' || event.key === ' '</code> to support keyboard accessibility.</li>
+        <li><code>submit</code>: Fires on form elements when saved or submitted, allowing developers to call <code>event.preventDefault()</code> to intercept standard page reloads and process data via JavaScript.</li>
+      </ul>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will examine and verify our event handling setup directly within our repository structure in the <code>dist/</code> workspace.</p>
+
+      <h3>Step 1: Inspect Project Files</h3>
+      <p>Open your project in VS Code and verify that <code>dist/assets/js/dom/script.js</code> contains our UI initialization functions, specifically examining how `initializeUI()` and `initializeTaskBoard()` register event listeners.</p>
+
+      <h3>Step 2: Start Local Server</h3>
+      <p>Launch VS Code Live Server pointing to <code>dist/index.html</code>. Open Chrome Developer Tools (<code>F12</code>) and navigate to the <strong>Console</strong> tab to observe event listener activity during execution.</p>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will review and analyze the robust event handling architecture already established in <code>dist/assets/js/dom/script.js</code>, focusing on theme toggling, modal dialog management, event delegation for the activity drawer, and form submissions.</p>
+
+      <h3>Step 1: Analyzing UI Event Listeners (<code>dist/assets/js/dom/script.js</code>)</h3>
+      <p>Examine how <code>initializeUI()</code> wires up global interface interactions using safe optional chaining and event delegation:</p>
+
+      <pre><code>function initializeUI(documentRef = document) {
+    const htmlRoot = documentRef.documentElement;
+    const themeToggle = documentRef.querySelector("#theme-toggle-btn");
+    const activityDrawer = documentRef.querySelector("#activity-drawer");
+    const modal = documentRef.querySelector("#task-modal");
+    const board = documentRef.querySelector(".board-columns-container");
+
+    themeInitialiser(documentRef);
+
+    // 1. Theme Toggle Click Listener with localStorage persistence
+    themeToggle?.addEventListener("click", () => {
+        const isDark = htmlRoot.getAttribute("data-theme") === "dark";
+        if (isDark) {
+            htmlRoot.removeAttribute("data-theme");
+        } else {
+            htmlRoot.setAttribute("data-theme", "dark");
+        }
+        try {
+            localStorage.setItem("theme", isDark ? "light" : "dark");
+        } catch (error) {
+            console.error("[Theme] Unable to save the selected theme.", error);
+        }
+    });
+
+    // 2. Hamburger Navigation Toggle
+    documentRef
+        .querySelector("#hamburgerMenu")
+        ?.addEventListener("click", () => {
+            documentRef.querySelector("#navbar")?.classList.toggle("show");
+        });
+
+    // 3. Modal Dialog Open & Close Listeners
+    const closeModal = () => {
+        if (modal) modal.style.display = "none";
+    };
+    documentRef
+        .querySelector("#open-modal-btn")
+        ?.addEventListener("click", () => {
+            if (modal) modal.style.display = "flex";
+        });
+    documentRef
+        .querySelector("#modal-close-btn")
+        ?.addEventListener("click", closeModal);
+    documentRef
+        .querySelector("#modal-cancel")
+        ?.addEventListener("click", closeModal);
+
+    // Backdrop click detection
+    modal?.addEventListener("click", (event) => {
+        if (event.target === modal) closeModal();
+    });
+
+    // 4. Activity Drawer Close Listener
+    documentRef
+        .querySelector("#drawer-btn-close")
+        ?.addEventListener("click", () => {
+            activityDrawer?.classList.remove("is-open");
+            activityDrawer?.setAttribute("aria-hidden", "true");
+        });
+
+    // 5. Event Delegation: Opening Activity Drawer on Task Card Click
+    board?.addEventListener("click", (event) => {
+        const card = event.target.closest(".task-card");
+        if (!card || !board.contains(card)) return;
+        activityDrawer?.classList.add("is-open");
+        activityDrawer?.setAttribute("aria-hidden", "false");
+    });
+
+    // 6. Keyboard Accessibility Delegation for Task Cards
+    board?.addEventListener("keydown", (event) => {
+        if (
+            (event.key === "Enter" || event.key === " ") &&
+            event.target.matches(".task-card")
+        ) {
+            event.preventDefault();
+            activityDrawer?.classList.add("is-open");
+            activityDrawer?.setAttribute("aria-hidden", "false");
+        }
+    });
+}</code></pre>
+
+      <h3>Step 2: Analyzing Form Submission Event Handling (<code>dist/assets/js/dom/script.js</code>)</h3>
+      <p>Examine how <code>initializeTaskBoard()</code> intercepts standard form submission events to prevent page reloads and process new task data:</p>
+
+      <pre><code>function initializeTaskBoard({ getTasks, createTask }, documentRef = document) {
+    const board = documentRef.querySelector(".board-columns-container");
+    const form = documentRef.querySelector("#task-form");
+    const errorMessage = documentRef.querySelector("#task-form-error");
+
+    renderBoard(getTasks(), documentRef);
+
+    if (form) {
+        form.addEventListener("submit", (event) => {
+            // Prevent default browser form submission (page reload)
+            event.preventDefault();
+            
+            const formData = new FormData(form);
+            const task = createTask({
+                title: formData.get("title"),
+                category: formData.get("category"),
+                priority: formData.get("priority"),
+                desc: formData.get("description"),
+                assignee: "Unassigned",
+                status: "todo",
+            });
+
+            if (!task) {
+                if (errorMessage) {
+                    errorMessage.textContent = "Please enter valid task details.";
+                }
+                return;
+            }
+
+            if (errorMessage) errorMessage.textContent = "";
+            form.reset();
+            documentRef.querySelector("#task-modal").style.display = "none";
+            renderBoard(getTasks(), documentRef);
+        });
+    }
+
+    return board;
+}</code></pre>
+
+      <h3>Step 3: Architectural Walkthrough &amp; Debugging Notes</h3>
+      <ol>
+        <li><strong>Preventing Default Form Actions:</strong> Calling <code>event.preventDefault()</code> inside the form `submit` listener stops the browser from executing its native HTTP GET/POST reload behavior, allowing our JavaScript application to manage data state asynchronously.</li>
+        <li><strong>Using `event.target.closest()`:</strong> When implementing event delegation on the board container, child elements (like the category tag or priority indicator) are clicked instead of the article itself. <code>closest('.task-card')</code> traverses upward from the click target to find the nearest ancestor matching `.task-card`, ensuring reliable interaction regardless of where inside the card the user clicks.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Add a dedicated click event listener inside <code>initializeUI()</code> in <code>dist/assets/js/dom/script.js</code> that listens for clicks on the task card option button (<code>.btn-icon</code>) and logs the parent task card's unique dataset ID to the console without triggering the activity drawer open event.</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>Attach a click listener to the board container or utilize existing event delegation.</li>
+        <li>Identify when <code>event.target.closest('.btn-icon')</code> is clicked.</li>
+        <li>Use <code>event.stopPropagation()</code> to prevent the click event from bubbling up to the card's main click listener (which opens the activity drawer).</li>
+        <li>Log <code>card.dataset.id</code> to the browser console.</li>
+      </ol>
+
+      <h3>Observable Acceptance Criteria:</h3>
+      <ul>
+        <li>Clicking the "⋮" option button on any task card prints its task ID in the developer console without sliding open the activity drawer panel.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-title">Instructor Answer Key (Hidden from Student Materials)</div>
+        <pre><code>// Add inside initializeUI(documentRef) in dist/assets/js/dom/script.js
+board?.addEventListener("click", (event) => {
+    const optionBtn = event.target.closest(".btn-icon");
+    if (optionBtn && board.contains(optionBtn)) {
+        event.stopPropagation(); // Prevent bubbling to card drawer trigger
+        const card = optionBtn.closest(".task-card");
+        const taskId = card ? card.dataset.id : null;
+        console.log(`[Task Options] Action triggered for Task ID: ${taskId}`);
+        return;
+    }
+
+    const card = event.target.closest(".task-card");
+    if (!card || !board.contains(card)) return;
+    activityDrawer?.classList.add("is-open");
+    activityDrawer?.setAttribute("aria-hidden", "false");
+});</code></pre>
+      </div>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>Event listeners registered via <code>addEventListener</code> provide clean, modular interaction management without inline markup coupling.</li>
+        <li>Event propagation consists of capturing, target, and bubbling phases; events bubble upward from target nodes to the root document.</li>
+        <li>Event delegation attaches a single listener to a stable parent container, using <code>event.target.closest()</code> to handle dynamic child elements efficiently.</li>
+        <li><code>event.preventDefault()</code> stops native browser actions (such as form reloads), while <code>event.stopPropagation()</code> halts event bubbling.</li>
+        <li>Accessibility requires combining mouse clicks with keyboard event listeners (`keydown` checking for `Enter` and `Spacebar`).</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>Why is event delegation significantly more performant than attaching individual event listeners to every task card on a large board?</em></li>
+        <li><em>What is the exact difference between `event.target` and `event.currentTarget` inside an event listener callback?</em></li>
+        <li><em>Why must we call `event.preventDefault()` inside a form submit event listener?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Delete Task Event Integration</h3>
+      <p>Implement an event delegation handler that listens for delete actions on task cards and removes the task from application state.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Add a delete action button or trigger inside <code>createTaskCardElement()</code> in <code>dist/assets/js/dom/script.js</code> (or utilize an existing trigger).</li>
+        <li>In <code>initializeUI()</code>, add an event delegation listener on the board or document that intercepts clicks on the delete trigger.</li>
+        <li>When triggered, extract the task ID from <code>card.dataset.id</code>, call the database deletion utility from <code>dist/assets/js/database/mockDb.js</code>, and re-render the board columns and metrics.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your updates to your feature branch: <code>feature/event-handling-listeners</code>.</li>
+        <li>Verify in Chrome DevTools that clicking the delete control successfully removes the card from the UI and updates `localStorage`.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
