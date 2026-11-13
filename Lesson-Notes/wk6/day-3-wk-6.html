@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week 6, Session 18: Interactive DOM Applications</title>
+  <style>
+    :root {
+      --primary-color: #0f172a;
+      --accent-color: #2563eb;
+      --text-color: #1e293b;
+      --bg-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --code-bg: #1e1e1e;
+      --code-text: #d4d4d4;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      line-height: 1.7;
+      color: var(--text-color);
+      background-color: #f1f5f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 60px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    header {
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.2rem;
+      margin: 0 0 10px 0;
+    }
+
+    header .meta {
+      font-weight: 600;
+      color: var(--accent-color);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-top: 40px;
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      color: #334155;
+      margin-top: 25px;
+      font-size: 1.2rem;
+    }
+
+    p, ul, ol {
+      margin-bottom: 1.2rem;
+    }
+
+    ul, ol {
+      padding-left: 25px;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    code {
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+
+    pre {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: "Consolas", "Courier New", Courier, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background-color: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .diagram {
+      background-color: #0f172a;
+      color: #38bdf8;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.3;
+    }
+
+    .callout {
+      background-color: #eff6ff;
+      border-left: 4px class var(--accent-color);
+      border-left: 4px solid var(--accent-color);
+      padding: 15px 20px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout.warning {
+      background-color: #fff1f2;
+      border-left-color: #e11d48;
+    }
+
+    .callout-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--primary-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    th, td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f8fafc;
+      color: var(--primary-color);
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="meta">Practical Software Engineering • Week 6: Day 3 • Session 18</div>
+      <h1>Interactive DOM Applications</h1>
+    </header>
+
+    <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+    <section>
+      <h2>1. Theory: The Big Picture</h2>
+      <p>Over Sessions 16 and 17, we established the two foundational pillars of front-end development: programmatic DOM node modification (using <code>createElement</code>, <code>textContent</code>, and `replaceChildren`) and event handling (using <code>addEventListener</code>, bubbling, and event delegation). In this session, we combine these concepts into a cohesive architectural pattern: <strong>Interactive DOM Applications &amp; Dynamic State Management</strong>.</p>
+
+      <p>In a professional single-page application (SPA), the user interface is never treated as a static document that gets patched haphazardly. Instead, the UI functions as a pure, reactive projection of the underlying data state. When a user interacts with the application—such as submitting a new task modal dialog, toggling dark mode persistence, or closing activity drawers—the application executes a strict data-flow cycle: <strong>User Action &rarr; Event Listener &rarr; State Mutation (Database/Storage) &rarr; DOM Re-rendering &amp; Metric Recalculation</strong>.</p>
+
+      <div class="diagram">
+USER ACTION            STATE MUTATION             DOM RE-RENDERING
++------------------+   +-----------------------+  +--------------------------------+
+| Click Save Task  |-> | mockDb.js (AddTask)   |->| script.js (renderBoardColumns) |
+| or Delete Card   |   | localStorage sync     |  | calc.js (renderDashboardMetrics)
++------------------+   +-----------------------+  +--------------------------------+
+      </div>
+
+      <p>Within our Kanban board architecture, maintaining clean boundaries across modules is paramount. Our entry point (`app.js`) coordinates startup sequences, `mockDb.js` safeguards array mutations and persistence, and `script.js` manages both structural rendering templates and interactive UI event lifecycles. Bringing these layers together ensures our application behaves predictably and scales cleanly.</p>
+    </section>
+
+    <!-- SECTION 2: THEORY - SEMANTIC WEB & TECHNICAL STANDARDS -->
+    <section>
+      <h2>2. Theory: Semantic Web &amp; Technical Standards</h2>
+
+      <h3>2.1 State-Driven UI Synchronization Architecture</h3>
+      <p>To avoid race conditions and UI desynchronization bugs, production interfaces adopt a unidirectional data flow pattern:</p>
+      <ul>
+        <li><strong>Single Source of Truth:</strong> The array managed inside `mockDb.js` dictates what data exists. The DOM should never store permanent application state; it simply reflects what is in memory.</li>
+        <li><strong>Idempotent Rendering:</strong> Rendering functions like <code>renderBoardColumns()</code> completely wipe and rebuild column contents safely using <code>replaceChildren()</code> based on fresh state arrays, eliminating stale element artifacts.</li>
+      </ul>
+
+      <h3>2.2 Lifecycle Management of Dynamic Components</h3>
+      <p>As components like task cards, dropdown menus, and modal backdrops open, close, or re-render, accessibility attributes (ARIA states) must be updated dynamically:</p>
+      <ul>
+        <li>Modals and drawers must toggle attributes such as <code>aria-hidden="true"</code> / <code>aria-hidden="false"</code> and CSS display states in unison.</li>
+        <li>Keyboard focus management ensures that when a modal closes, focus returns naturally to the trigger button that opened it, preserving accessibility compliance.</li>
+      </ul>
+
+      <h3>2.3 Graceful Degradation and Empty State Handling</h3>
+      <p>A hallmark of professional interface design is how an application responds when datasets are empty. Rather than rendering blank, broken column spaces, our Kanban board implements programmatic empty-state indicator nodes (e.g., <code>.empty-column-message</code>) that inform users cleanly when a column contains zero tasks.</p>
+    </section>
+
+    <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+    <section>
+      <h2>3. Lab: Environment Setup</h2>
+      <p>We will examine and verify our fully integrated interactive architecture within our repository workspace in <code>dist/</code>.</p>
+
+      <h3>Step 1: Inspect Module Files</h3>
+      <p>Verify that your project structure contains the completed interactive modules:</p>
+      <pre><code>dist/
+├── index.html
+└── assets/
+    ├── css/
+    │   └── styles.css
+    └── js/
+        ├── app.js
+        ├── database/
+        │   └── mockDb.js
+        ├── dom/
+        │   └── script.js
+        └── utils/
+            ├── calc.js
+            └── tasks.js</code></pre>
+
+      <h3>Step 2: Start Local Server</h3>
+      <p>Launch VS Code Live Server pointing to <code>dist/index.html</code>. Open Chrome Developer Tools (<code>F12</code>) to monitor console execution and local storage state updates.</p>
+    </section>
+
+    <!-- SECTION 4: LAB - GUIDED CODING -->
+    <section>
+      <h2>4. Lab: Guided Coding</h2>
+      <p>We will examine the complete integration of state-driven DOM rendering, form submission event handling, modal dialog controls, and empty-state indicators across our project files.</p>
+
+      <h3>Step 1: Application Entry Point Integration (<code>dist/assets/js/app.js</code>)</h3>
+      <p>Review how <code>app.js</code> initializes data retrieval, metric calculation, and UI event binding upon DOM content loading:</p>
+
+      <pre><code>import { getTasks } from "./database/mockDb.js";
+import { calculateBoardMetrics } from "./utils/calc.js";
+import {
+    initializeTaskBoard,
+    initializeUI,
+    renderBoardColumns,
+    renderDashboardMetrics,
+} from "./dom/script.js";
+import { createNewTaskObj } from "./utils/tasks.js";
+
+function initApp() {
+    const tasks = getTasks();
+    const metrics = calculateBoardMetrics(tasks);
+
+    const createNewTask = createNewTaskObj(tasks);
+
+    renderBoardColumns(tasks);
+    renderDashboardMetrics(metrics);
+    initializeUI();
+    initializeTaskBoard(tasks, createNewTask);
+}
+
+// Execute when DOM tree is fully parsed
+document.addEventListener('DOMContentLoaded', initApp);</code></pre>
+
+      <h3>Step 2: Comprehensive DOM Rendering &amp; State Management (<code>dist/assets/js/dom/script.js</code>)</h3>
+      <p>Examine how <code>renderBoardColumns()</code> incorporates empty-state node injection when a status column has zero matching records:</p>
+
+      <pre><code>function renderBoardColumns(tasks) {
+    const statuses = ["todo", "in_progress", "review", "done"];
+
+    statuses.forEach((stat) => {
+        const columnContainer = document.querySelector(
+            `#${stat.toLowerCase()}-task-cards`,
+        );
+
+        if (!columnContainer) {
+            console.warn(
+                `Render warning: Column container for status '${stat}' not found.`,
+            );
+            return;
+        }
+
+        const columnTitleCont = document.createElement("header");
+        columnTitleCont.className = "column-header";
+
+        const columnTitle = document.createElement("h2");
+        columnTitle.className = "column-title";
+        columnTitle.textContent = stat.replace("_", " ").toUpperCase();
+
+        columnTitleCont.appendChild(columnTitle);
+
+        const matchingTasks = tasks.filter(
+            (task) => task.status.toLowerCase() === stat.toLowerCase(),
+        );
+
+        const fragment = document.createDocumentFragment();
+
+        // Graceful degradation: Handle empty column states programmatically
+        if (matchingTasks.length === 0) {
+            const emptyColumn = document.createElement("div");
+            emptyColumn.className = "empty-column-message";
+            emptyColumn.textContent = "No tasks in this column.🥲";
+            fragment.appendChild(emptyColumn);
+        } else {
+            matchingTasks.forEach((task) => {
+                const cardElement = createTaskCardElement(task);
+                fragment.appendChild(cardElement);
+            });
+        }
+
+        // Reset container contents safely and append fragment
+        columnContainer.replaceChildren(columnTitleCont, fragment);
+    });
+}</code></pre>
+
+      <h3>Step 3: Architectural Walkthrough &amp; Debugging Notes</h3>
+      <ol>
+        <li><strong>Unidirectional Data Flow:</strong> When a user submits the new task modal form, <code>initializeTaskBoard()</code> captures form data, invokes the task creation utility, saves the new task to `mockDb.js` / `localStorage`, and immediately re-triggers <code>renderBoardColumns()</code> and <code>renderDashboardMetrics()</code>. The UI updates instantly to reflect the new state.</li>
+        <li><strong>Fragment Batching with Empty States:</strong> Inserting either an empty message <code>div</code> or a batch of task card elements into the <code>DocumentFragment</code> before making a single <code>replaceChildren()</code> call ensures optimal rendering performance.</li>
+      </ol>
+    </section>
+
+    <!-- SECTION 5: CLASSWORK -->
+    <section>
+      <h2>5. Classwork</h2>
+
+      <h3>Task Requirement</h3>
+      <p>Write an auxiliary helper function named <code>refreshDashboard(tasks)</code> inside <code>dist/assets/js/dom/script.js</code> that centralizes re-rendering tasks, recalculating metrics, and updating the UI.</p>
+
+      <h3>Requirements:</h3>
+      <ol>
+        <li>Import or accept the current tasks array.</li>
+        <li>Calculate board metrics using <code>calculateBoardMetrics(tasks)</code>.</li>
+        <li>Call <code>renderBoardColumns(tasks)</code> and <code>renderDashboardMetrics(metrics)</code>.</li>
+        <li>Export <code>refreshDashboard</code> so it can be called across modules after any state mutation (such as task creation or deletion).</li>
+      </ol>
+
+      <h3>Observable Acceptance Criteria:</h3>
+      <ul>
+        <li>Calling <code>refreshDashboard(getTasks())</code> in the browser console updates all board columns and header metric cards simultaneously without requiring a page reload.</li>
+      </ul>
+
+      <div class="callout">
+        <div class="callout-title">Instructor Answer Key (Hidden from Student Materials)</div>
+        <pre><code>/**
+ * Centralized helper function to synchronize state changes with the DOM.
+ * @param {Array} tasks - Current task repository array
+ */
+export function refreshDashboard(tasks) {
+    const metrics = calculateBoardMetrics(tasks);
+    renderBoardColumns(tasks);
+    renderDashboardMetrics(metrics);
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+    <section>
+      <h2>6. Debrief and Homework</h2>
+
+      <h3>Key Takeaways</h3>
+      <ol>
+        <li>Interactive DOM applications rely on a strict unidirectional data flow: user action triggers state mutation, which immediately drives UI re-rendering.</li>
+        <li>Centralizing rendering logic into helper functions prevents code duplication and keeps event listeners clean.</li>
+        <li>Empty-state handling ensures robust user feedback when data collections are empty.</li>
+        <li>Preserving separation of concerns across database modules, utility functions, and DOM rendering scripts is essential for scalable architecture.</li>
+      </ol>
+
+      <h3>Reflective Engineering Questions</h3>
+      <ol>
+        <li><em>Why is it dangerous to store active application state directly inside DOM element attributes instead of a centralized JavaScript array?</em></li>
+        <li><em>What is the performance benefit of rebuilding board columns using `replaceChildren()` with a `DocumentFragment` compared to manipulating live DOM nodes individually?</em></li>
+        <li><em>How does centralized dashboard refreshing simplify adding new features like task deletion or status movement?</em></li>
+      </ol>
+
+      <h3>Homework Assignment: Dynamic Status Badge Filtering UI</h3>
+      <p>Implement an interactive filter bar UI component that dynamically filters displayed task cards on the board based on category selection.</p>
+
+      <h4>Assignment Requirements</h4>
+      <ol>
+        <li>Add a category filter dropdown selector or button group inside <code>dist/index.html</code> above the board columns container.</li>
+        <li>In <code>dist/assets/js/dom/script.js</code>, register a <code>change</code> event listener on the filter element.</li>
+        <li>When a category (e.g., "frontend", "backend") is selected, filter the task array accordingly and pass the filtered subset to <code>renderBoardColumns()</code>. Selecting "all" displays the full task repository.</li>
+      </ol>
+
+      <h4>Submission Criteria</h4>
+      <ul>
+        <li>Commit your updates to your feature branch: <code>feature/interactive-dom-applications</code>.</li>
+        <li>Verify in Chrome DevTools that changing the filter dropdown instantly redraws the Kanban board to show only matching category cards.</li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Practical Software Engineering Curriculum • Agile Task Board Architecture (Kanban-Style)</p>
+    </footer>
+  </div>
+
+</body>
+</html>
