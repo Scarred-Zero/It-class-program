@@ -1,0 +1,1197 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            Week 7, Session 20: JS Event Loop, call stack, task queues, Promise
+            states, and async/await syntax
+        </title>
+        <style>
+            :root {
+                --primary-color: #0f172a;
+                --accent-color: #2563eb;
+                --text-color: #1e293b;
+                --bg-light: #f8fafc;
+                --border-color: #e2e8f0;
+                --code-bg: #1e1e1e;
+                --code-text: #d4d4d4;
+            }
+
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+                    sans-serif;
+                line-height: 1.7;
+                color: var(--text-color);
+                background-color: #f1f5f9;
+                margin: 0;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 960px;
+                margin: 0 auto;
+                background: #ffffff;
+                padding: 40px 60px;
+                border-radius: 12px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            }
+
+            header {
+                border-bottom: 2px solid var(--border-color);
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+            }
+
+            header h1 {
+                color: var(--primary-color);
+                font-size: 2.2rem;
+                margin: 0 0 10px 0;
+            }
+
+            header .meta {
+                font-weight: 600;
+                color: var(--accent-color);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                font-size: 0.9rem;
+            }
+
+            h2 {
+                color: var(--primary-color);
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 8px;
+                margin-top: 40px;
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                color: #334155;
+                margin-top: 25px;
+                font-size: 1.2rem;
+            }
+
+            h4 {
+                color: #334155;
+                margin-top: 20px;
+                font-size: 1.05rem;
+            }
+
+            p,
+            ul,
+            ol {
+                margin-bottom: 1.2rem;
+            }
+
+            ul,
+            ol {
+                padding-left: 25px;
+            }
+
+            li {
+                margin-bottom: 0.5rem;
+            }
+
+            code {
+                font-family: "Consolas", "Courier New", Courier, monospace;
+                background-color: #f1f5f9;
+                color: #0f172a;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.9em;
+            }
+
+            pre {
+                background-color: var(--code-bg);
+                color: var(--code-text);
+                padding: 20px;
+                border-radius: 8px;
+                overflow-x: auto;
+                font-family: "Consolas", "Courier New", Courier, monospace;
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+
+            pre code {
+                background-color: transparent;
+                color: inherit;
+                padding: 0;
+            }
+
+            .diagram {
+                background-color: #0f172a;
+                color: #38bdf8;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-family: monospace;
+                white-space: pre;
+                overflow-x: auto;
+                margin: 20px 0;
+                line-height: 1.3;
+            }
+
+            .callout {
+                background-color: #eff6ff;
+                border-left: 4px solid var(--accent-color);
+                padding: 15px 20px;
+                margin: 20px 0;
+                border-radius: 0 8px 8px 0;
+            }
+
+            .callout.warning {
+                background-color: #fff1f2;
+                border-left-color: #e11d48;
+            }
+
+            .callout-title {
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: var(--primary-color);
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }
+
+            th,
+            td {
+                border: 1px solid var(--border-color);
+                padding: 10px 14px;
+                text-align: left;
+            }
+
+            th {
+                background-color: #f8fafc;
+                color: var(--primary-color);
+            }
+
+            footer {
+                margin-top: 50px;
+                padding-top: 20px;
+                border-top: 1px solid var(--border-color);
+                font-size: 0.85rem;
+                color: #64748b;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- SECTION 1: THEORY - THE BIG PICTURE -->
+            <section>
+                <h2>1. Theory: The Big Picture</h2>
+                <p>
+                    Up through Week 6, every operation in our Agile Kanban Task
+                    Board has been <strong>synchronous</strong>. When
+                    <code>loadFromStorage()</code> reads from
+                    <code>localStorage</code>, or when
+                    <code>addTaskToDatabase()</code> pushes a task object onto
+                    the <code>tasks</code> array inside
+                    <code>dist/assets/js/database/mockDb.js</code>, JavaScript
+                    executes each line immediately in strict top-to-bottom order
+                    and returns the result on the very next instruction.
+                </p>
+
+                <p>
+                    Real-world web applications rarely operate on in-memory
+                    arrays alone. In production, a Kanban board loads tasks from
+                    a remote database over HTTPS, saves new cards to a cloud
+                    API, and synchronizes team activity logs across browsers.
+                    Network requests, disk reads, and timers do not complete
+                    instantaneously&mdash;they take anywhere from 20
+                    milliseconds to several seconds. Because JavaScript runs on
+                    a <strong>single main thread</strong> inside the browser,
+                    waiting synchronously for a slow network call would freeze
+                    the entire user interface: buttons would stop responding,
+                    CSS animations would stall, and the browser tab would become
+                    completely unresponsive.
+                </p>
+
+                <div class="diagram">
+                1. SYNCHRONOUS BLOCKING (Freezes UI)
+                ┌────────────┐    ┌──────────────────────────┐    ┌──────────────┐
+                │ Call Stack │───▶│ Wait 2,000ms for Network │───▶│ Render Board │
+                └────────────┘    └──────────────────────────┘    └──────────────┘
+                                            ▲
+                                User clicks & typing ignored!
+
+                2. ASYNCHRONOUS NON-BLOCKING (Event Loop Model)
+                ┌────────────┐    ┌─────────────────────┐    ┌────────────────────┐
+                │ Call Stack │───▶│ Start Async Request │───▶│ Keep UI Responsive │
+                └────────────┘    └─────────────────────┘    └────────────────────┘
+                                            │                         ▲
+                                            ▼                         │
+                                ┌──────────────────┐       ┌────────┴────────┐
+                                │ Web APIs / Timer │──────▶│ Callback Queues │
+                                └──────────────────┘       └─────────────────┘
+                                                            (Event Loop pushes
+                                                            callback when ready)
+
+                </div>
+                <p>
+                    <strong>Session Learning Objectives:</strong> By the end of
+                    this session, you will be able to:
+                </p>
+                <ol>
+                    <li>
+                        Trace how the JavaScript <strong>Call Stack</strong>,
+                        <strong>Web APIs</strong>,
+                        <strong>Microtask Queue</strong>,
+                        <strong>Callback (Macrotask) Queue</strong>, and
+                        <strong>Event Loop</strong> coordinate non-blocking
+                        execution.
+                    </li>
+                    <li>
+                        Explain the three lifecycle states of a JavaScript
+                        <code>Promise</code> (<code>pending</code>,
+                        <code>fulfilled</code>, and <code>rejected</code>) and
+                        handle outcomes using <code>.then()</code>,
+                        <code>.catch()</code>, and <code>.finally()</code>.
+                    </li>
+                    <li>
+                        Refactor Promise chains into clean, readable
+                        <code>async</code>/<code>await</code> functions with
+                        structured <code>try / catch</code> error handling.
+                    </li>
+                    <li>
+                        Upgrade our Kanban board's persistence layer in
+                        <code>dist/assets/js/database/mockDb.js</code> and UI
+                        workflows in
+                        <code>dist/assets/js/dom/script.js</code> and
+                        <code>dist/assets/js/app.js</code> to simulate realistic
+                        asynchronous storage latency without breaking module
+                        boundaries.
+                    </li>
+                </ol>
+            </section>
+
+            <!-- SECTION 2: THEORY - SEMANTIC WEB & TECHNICAL STANDARDS -->
+            <section>
+                <h2>2. Theory: Semantic Web &amp; Technical Standards</h2>
+
+                <h3>2.1 The JavaScript Runtime &amp; The Event Loop</h3>
+                <p>
+                    The JavaScript engine itself (such as V8 in Chrome and Edge)
+                    only manages memory allocation (the <strong>Heap</strong>)
+                    and function execution frames (the
+                    <strong>Call Stack</strong>). Asynchronous capabilities like
+                    <code>setTimeout()</code>, <code>fetch()</code>, and DOM
+                    events are provided by the host browser environment via
+                    <strong>Web APIs</strong>.
+                </p>
+                <ul>
+                    <li>
+                        <strong>Call Stack (LIFO):</strong> A Last-In, First-Out
+                        stack tracking the currently executing function. When
+                        <code>refreshDashboard()</code> calls
+                        <code>calculateBoardMetrics()</code>,
+                        <code>calculateBoardMetrics</code> is pushed onto the
+                        stack, executes, and pops off before
+                        <code>renderBoardColumns()</code> is pushed.
+                    </li>
+                    <li>
+                        <strong>Callback Queue (Macrotask Queue):</strong> Holds
+                        callbacks from completed Web APIs such as
+                        <code>setTimeout</code>, <code>setInterval</code>, and
+                        UI DOM events.
+                    </li>
+                    <li>
+                        <strong>Microtask Queue:</strong> A high-priority queue
+                        reserved for <code>Promise</code> callbacks
+                        (<code>.then</code>, <code>.catch</code>,
+                        <code>.finally</code>) and code resuming after an
+                        <code>await</code> keyword.
+                    </li>
+                    <li>
+                        <strong>The Event Loop:</strong> A continuous
+                        coordination loop with one strict rule:
+                        <em
+                            >Whenever the Call Stack becomes completely empty,
+                            drain every single task in the Microtask Queue first
+                            before taking one task from the Callback Queue.</em
+                        >
+                    </li>
+                </ul>
+
+                <div class="diagram">
+                        ┌────────────────────────────────────────────────────────────────────────────┐
+                        │ BROWSER RUNTIME                                                            │
+                        │                                                                            │
+                        │   ┌─────────────────────┐             ┌────────────────────────────────┐   │
+                        │   │ CALL STACK          │────────────▶│ WEB APIs                       │   │
+                        │   │ (Single Thread)     │             │ setTimeout(), fetch(), DOM     │   │
+                        │   └─────────────────────┘             └────────────────────────────────┘   │
+                        │              ▲                                         │                   │
+                        │              │                                         │                   │
+                        │              │ (3. Next Macrotask)                     │ (1. Complete)     │
+                        │              │                                         ▼                   │
+                        │   ┌─────────────────────┐             ┌────────────────────────────────┐   │
+                        │   │ EVENT LOOP          │◀────────────│ MICROTASK QUEUE (High)         │   │
+                        │   └─────────────────────┘             │ Promise.then / await           │   │
+                        │              ▲                        └────────────────────────────────┘   │
+                        │              │                                                             │
+                        │              │ (2. Drain ALL first)                                        │
+                        │              │                                                             │
+                        │              │                        ┌────────────────────────────────┐   │
+                        │              └────────────────────────│ CALLBACK QUEUE (Standard)      │   │
+                        │                                       │ setTimeout / Click Events      │   │
+                        │                                       └────────────────────────────────┘   │
+                        └────────────────────────────────────────────────────────────────────────────┘
+
+                </div>
+                <h3>2.2 Promise Lifecycle States</h3>
+                <p>
+                    Introduced in ES2015 (ES6), a <code>Promise</code> is a
+                    standardized JavaScript object representing the eventual
+                    completion or failure of an asynchronous operation. Every
+                    Promise exists in one of three mutually exclusive states:
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Meaning</th>
+                            <th>Settled?</th>
+                            <th>Transition Trigger</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>pending</code></td>
+                            <td>
+                                Initial state; the asynchronous operation is
+                                still in progress.
+                            </td>
+                            <td>No</td>
+                            <td>
+                                Created via
+                                <code
+                                    >new Promise((resolve, reject) =&gt;
+                                    ...)</code
+                                >
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>fulfilled</code></td>
+                            <td>
+                                The operation completed successfully and
+                                produced a result value.
+                            </td>
+                            <td>Yes (Immutable)</td>
+                            <td>
+                                <code>resolve(value)</code> is called inside the
+                                executor.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>rejected</code></td>
+                            <td>
+                                The operation failed and produced a reason
+                                (usually an <code>Error</code> object).
+                            </td>
+                            <td>Yes (Immutable)</td>
+                            <td>
+                                <code>reject(error)</code> is called or an
+                                exception is thrown.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    Once a Promise transitions from <code>pending</code> to
+                    either <code>fulfilled</code> or <code>rejected</code>, it
+                    is <strong>settled</strong> and can never change state
+                    again.
+                </p>
+
+                <h3>2.3 Async/Await Syntax &amp; Semantic Accessibility</h3>
+                <p>
+                    <code>async</code> and <code>await</code> (ES2017) provide
+                    syntactic sugar built directly on top of Promises:
+                </p>
+                <ul>
+                    <li>
+                        Marking a function with <code>async</code> guarantees
+                        that it always returns a <code>Promise</code>. Returning
+                        a plain value automatically wraps it in a fulfilled
+                        Promise; throwing an error returns a rejected Promise.
+                    </li>
+                    <li>
+                        Using <code>await</code> pauses execution
+                        <em>only inside that <code>async</code> function</em>
+                        until the awaited Promise settles, yielding the main
+                        thread back to the Event Loop so the UI remains
+                        responsive.
+                    </li>
+                    <li>
+                        <strong
+                            >Accessibility &amp; Asynchronous Feedback:</strong
+                        >
+                        When an interface performs asynchronous work (such as
+                        saving a task or loading the board), screen readers and
+                        sighted users cannot see background Promises running.
+                        Semantically, buttons should temporarily set
+                        <code>disabled = true</code> and
+                        <code>aria-busy="true"</code> to prevent duplicate
+                        submissions, while status regions with
+                        <code>aria-live="polite"</code> announce loading or
+                        error states cleanly.
+                    </li>
+                </ul>
+            </section>
+
+            <!-- SECTION 3: LAB - ENVIRONMENT SETUP -->
+            <section>
+                <h2>3. Lab: Environment Setup</h2>
+                <p>
+                    We will work directly inside the existing
+                    <code>dist/</code> deployment directory without adding
+                    external libraries or build tools.
+                </p>
+
+                <h3>Step 1: Verify Current Module Structure</h3>
+                <p>
+                    Confirm that your workspace matches the current Kanban
+                    repository layout:
+                </p>
+                <pre><code>dist/
+├── index.html
+└── assets/
+├── css/
+│   ├── styles.css
+│   └── responsiveness.css
+└── js/
+├── app.js
+├── database/
+│   └── mockDb.js
+├── dom/
+│   └── script.js
+└── utils/
+├── calc.js
+├── tasks.js
+└── validation.js
+  </code></pre>
+                <h3>Step 2: Launch Live Server &amp; Open DevTools Console</h3>
+                <ol>
+                    <li>
+                        Open <code>dist/index.html</code> using VS Code Live
+                        Server (or another local static HTTP server, which is
+                        required for browser ES modules).
+                    </li>
+                    <li>
+                        Open Chrome/Edge DevTools (<code>F12</code> or
+                        <code>Ctrl+Shift+I</code> / <code>Cmd+Option+I</code>)
+                        and switch to the <strong>Console</strong> tab.
+                    </li>
+                    <li>
+                        Run a quick Event Loop execution-order check directly in
+                        the console to observe Microtask vs. Macrotask priority
+                        before editing project files:
+                    </li>
+                </ol>
+                <pre><code>console.log("1. Synchronous Start");
+setTimeout(() => {
+console.log("4. Macrotask (setTimeout 0ms)");
+}, 0);
+
+Promise.resolve().then(() => {
+console.log("3. Microtask (Promise.then)");
+});
+
+console.log("2. Synchronous End");
+  </code></pre>
+                <p>
+                    Observe that <code>3. Microtask (Promise.then)</code> logs
+                    before <code>4. Macrotask (setTimeout 0ms)</code>, even
+                    though the timer delay was set to 0 milliseconds.
+                </p>
+            </section>
+            <!-- SECTION 4: LAB - GUIDED CODING -->
+            <section>
+                <h2>4. Lab: Guided Coding</h2>
+                <p>
+                    To prepare our Kanban Task Board for real backend API
+                    integration in upcoming sessions, we will introduce a
+                    realistic asynchronous storage boundary inside
+                    <code>mockDb.js</code> while preserving clean module
+                    separation:
+                </p>
+                <ul>
+                    <li>
+                        <code>mockDb.js</code> will own simulated
+                        network/storage latency via a Promise-based helper and
+                        expose asynchronous CRUD functions
+                        (<code>loadTasksAsync</code>, <code>addTaskAsync</code>,
+                        <code>deleteTaskAsync</code>).
+                    </li>
+                    <li>
+                        <code>tasks.js</code> will coordinate task creation
+                        asynchronously.
+                    </li>
+                    <li>
+                        <code>script.js</code> and <code>app.js</code> will use
+                        <code>async</code>/<code>await</code> with
+                        <code>try / catch</code> blocks and loading states so
+                        the UI updates safely after Promises settle.
+                    </li>
+                </ul>
+
+                <div class="callout warning">
+                    <div class="callout-title">
+                        Important Note on Existing Task IDs in
+                        <code>mockDb.js</code>
+                    </div>
+                    <p>
+                        Notice that in <code>mockDb.js</code>, the default mock
+                        tasks have numeric IDs (<code>201</code> through
+                        <code>208</code>), while
+                        <code>isValidTask()</code> checks
+                        <code>typeof task.id === "string"</code> and
+                        <code>createNewTaskObj()</code> generates string UUIDs
+                        via <code>crypto.randomUUID()</code>. Keep string IDs
+                        consistent for newly created tasks so validation
+                        continues to pass cleanly.
+                    </p>
+                </div>
+
+                <h3>
+                    Step 1: Add Promise-Based Latency &amp; Async Storage
+                    Operations (<code>dist/assets/js/database/mockDb.js</code>)
+                </h3>
+                <p>
+                    Open <code>dist/assets/js/database/mockDb.js</code>. Add a
+                    <code>simulateLatency(ms)</code> utility that wraps
+                    <code>setTimeout</code> inside a <code>Promise</code>, then
+                    create asynchronous versions of load, add, and delete
+                    operations alongside your existing synchronous functions so
+                    existing tests or helpers do not break.
+                </p>
+                <pre><code>// Add near the top of dist/assets/js/database/mockDb.js, below VALID_PRIORITIES
+
+const simulateLatency = (ms = 300) =>
+new Promise((resolve) => {
+setTimeout(resolve, ms);
+});
+
+async function loadTasksAsync() {
+await simulateLatency(350);
+return loadFromStorage();
+}
+
+async function addTaskAsync(task) {
+await simulateLatency(300);
+
+if (
+    !isValidTask(task) ||
+    tasks.some((existing) =&gt; existing.id === task.id)
+) {
+    throw new Error("Invalid task payload or duplicate task ID.");
+}
+
+const taskCopy = Object.assign({}, task);
+tasks.push(taskCopy);
+syncToStorage();
+return Object.assign({}, taskCopy);
+
+}
+
+async function deleteTaskAsync(taskId) {
+await simulateLatency(250);
+
+if (taskId === null || taskId === undefined) {
+    throw new Error("A valid task ID is required for deletion.");
+}
+
+const taskIndex = tasks.findIndex(
+    (task) =&gt; String(task.id) === String(taskId),
+);
+if (taskIndex === -1) {
+    throw new Error(`Task with ID '${taskId}' was not found.`);
+}
+
+tasks.splice(taskIndex, 1);
+syncToStorage();
+return true;
+
+}
+  </code></pre>
+
+                <p>
+                    Update the export block at the bottom of
+                    <code>dist/assets/js/database/mockDb.js</code> to export the
+                    new asynchronous functions:
+                </p>
+                <pre><code>
+export {
+addTaskAsync,
+addTaskToDatabase,
+deleteTaskAsync,
+deleteTaskFromDatabase,
+getTasks,
+loadFromStorage,
+loadTasksAsync,
+syncToStorage,
+updateTaskInDatabase,
+};
+  </code></pre>
+                <h3>
+                    Step 2: Create an Async Task Workflow Helper
+                    (<code>dist/assets/js/utils/tasks.js</code>)
+                </h3>
+                <p>
+                    Open <code>dist/assets/js/utils/tasks.js</code>. Import
+                    <code>addTaskAsync</code> and
+                    <code>deleteTaskAsync</code> from
+                    <code>../database/mockDb.js</code>, and add
+                    <code>createNewTaskAsync</code> so task creation awaits
+                    database persistence before returning the created object.
+                </p>
+                <pre><code>// Update the import statement at the top of dist/assets/js/utils/tasks.js
+
+import {
+addTaskAsync,
+addTaskToDatabase,
+deleteTaskAsync,
+deleteTaskFromDatabase,
+getTasks,
+updateTaskInDatabase,
+} from "../database/mockDb.js";
+  </code></pre>
+                <p>
+                    Add <code>createNewTaskAsync</code> and
+                    <code>deleteTaskByIdAsync</code> inside
+                    <code>dist/assets/js/utils/tasks.js</code>:
+                </p>
+                <pre><code>
+const createNewTaskAsync = async ({
+title,
+category,
+priority,
+desc,
+assignee,
+status = "todo",
+}) => {
+if (!validateTaskInput(title, category, priority, desc, assignee, status)) {
+return false;
+}
+
+const newTask = {
+    id: crypto.randomUUID(),
+    title: title.trim(),
+    category,
+    priority,
+    desc: desc.trim(),
+    assignee: assignee.trim(),
+    status,
+    point: 0,
+};
+
+return await addTaskAsync(newTask);
+
+};
+
+const deleteTaskByIdAsync = async (taskId) => await deleteTaskAsync(taskId);
+  </code></pre>
+                <p>
+                    Ensure both functions are exported in
+                    <code>dist/assets/js/utils/tasks.js</code>:
+                </p>
+                <pre><code>
+export {
+createNewTaskAsync,
+createNewTaskObj,
+deleteTaskById,
+deleteTaskByIdAsync,
+exportTasksByCategory,
+extractedTasksByStatus,
+filterTasksByPriority,
+formatTaskSumamry,
+getCategoryTaskCounts,
+getColumnNameByStatus,
+getTaskById,
+hasUrgentPendingTasks,
+searchTasksByKeyword,
+updateTaskStatus,
+generateSprintSummaryReport,
+refreshDashboard,
+};
+  </code></pre>
+                <h3>
+                    Step 3: Handle Async Form Submission &amp; Card Deletion in
+                    the UI (<code>dist/assets/js/dom/script.js</code>)
+                </h3>
+                <p>
+                    Open <code>dist/assets/js/dom/script.js</code>. When a user
+                    submits <code>#task-form</code> or clicks
+                    <code>.delete-task-btn</code>, our event listeners must
+                    become <code>async</code> functions, disable interactive
+                    controls while awaiting the Promise, and wrap the
+                    <code>await</code> call in
+                    <code>try / catch / finally</code>.
+                </p>
+                <pre><code>// Update imports at the top of dist/assets/js/dom/script.js
+
+import {
+deleteTaskAsync,
+getTasks,
+} from "../database/mockDb.js";
+import { refreshDashboard } from "../utils/tasks.js";
+  </code></pre>
+                <p>
+                    Update the board click delegation handler inside
+                    <code>initializeUI()</code> in
+                    <code>dist/assets/js/dom/script.js</code> to await
+                    <code>deleteTaskAsync(taskId)</code>:
+                </p>
+                <pre><code>
+    board?.addEventListener("click", async (event) => {
+// 1. Check action buttons first (most specific first)
+const deleteBtn = event.target.closest(".delete-task-btn");
+const optionBtn = event.target.closest(".btn-icon");
+const activeBtn = deleteBtn || optionBtn;
+
+    if (activeBtn &amp;&amp; board.contains(activeBtn)) {
+        const card = activeBtn.closest(".task-card");
+        const taskId = card ? card.dataset.id : null;
+
+        if (deleteBtn) {
+            deleteBtn.disabled = true;
+            deleteBtn.setAttribute("aria-busy", "true");
+
+            try {
+                await deleteTaskAsync(taskId);
+                const tasks = getTasks();
+                refreshDashboard(tasks, documentRef);
+                console.log(
+                    `[Delete Task] Async deletion completed for Task ID: ${taskId}`,
+                );
+            } catch (error) {
+                console.error(
+                    `[Delete Task] Unable to delete task with ID: ${taskId}`,
+                    error,
+                );
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.removeAttribute("aria-busy");
+            }
+            return;
+        }
+
+        if (optionBtn) {
+            console.log(
+                `[Task Options] Action triggered for Task ID: ${taskId}`,
+            );
+            return;
+        }
+    }
+
+    // 2. Fallback: Open activity drawer when card body is clicked
+    const card = event.target.closest(".task-card");
+    if (!card || !board.contains(card)) return;
+
+    activityDrawer?.classList.add("is-open");
+    activityDrawer?.setAttribute("aria-hidden", "false");
+});</code></pre>
+                <p>
+                    Next, update <code>initializeTaskBoard()</code> in
+                    <code>dist/assets/js/dom/script.js</code> so the form submit
+                    handler awaits <code>createTask(...)</code> and provides
+                    accessible feedback on <code>#modal-save</code>:
+                </p>
+                <pre><code>function initializeTaskBoard(tasks, createTask, documentRef = document) {
+const board = documentRef.querySelector(".board-columns-container");
+const form = documentRef.querySelector("#task-form");
+const errorMessage = documentRef.querySelector("#task-form-error");
+const saveBtn = documentRef.querySelector("#modal-save");
+const modal = documentRef.querySelector("#task-modal");
+
+refreshDashboard(tasks, documentRef);
+
+if (form) {
+    form.addEventListener("submit", async (event) =&gt; {
+        event.preventDefault();
+        const formData = new FormData(form);
+
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.setAttribute("aria-busy", "true");
+            saveBtn.textContent = "Saving...";
+        }
+
+        try {
+            const task = await createTask({
+                title: formData.get("title"),
+                category: formData.get("category"),
+                priority: formData.get("priority"),
+                desc: formData.get("description"),
+                assignee: formData.get("assignee") || "Unassigned",
+                status: "todo",
+            });
+
+            if (!task) {
+                if (errorMessage) {
+                    errorMessage.textContent =
+                        "Please enter valid task details.";
+                }
+                return;
+            }
+
+            if (errorMessage) errorMessage.textContent = "";
+            form.reset();
+            if (modal) modal.style.display = "none";
+            const updatedTasks = getTasks();
+            refreshDashboard(updatedTasks, documentRef);
+        } catch (error) {
+            console.error("[Task Form] Async save failed:", error);
+            if (errorMessage) {
+                errorMessage.textContent =
+                    "Unable to save task. Please try again.";
+            }
+        } finally {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.removeAttribute("aria-busy");
+                saveBtn.textContent = "Save Task";
+            }
+        }
+    });
+}
+
+return board;
+
+}
+
+  </code></pre>
+                <h3>
+                    Step 4: Coordinate Async Startup in Entry Point
+                    (<code>dist/assets/js/app.js</code>)
+                </h3>
+                <p>
+                    Update <code>dist/assets/js/app.js</code> so application
+                    startup initializes UI listeners immediately (allowing theme
+                    toggle and modal controls to work right away) while
+                    asynchronously loading saved tasks from
+                    <code>loadTasksAsync()</code>:
+                </p>
+                <pre><code>import { getTasks, loadTasksAsync } from "./database/mockDb.js";
+
+import { initializeTaskBoard, initializeUI } from "./dom/script.js";
+import { createNewTaskAsync } from "./utils/tasks.js";
+
+async function initApp() {
+initializeUI();
+
+try {
+    const tasks = await loadTasksAsync();
+    initializeTaskBoard(tasks, createNewTaskAsync);
+} catch (error) {
+    console.error("[App Init] Failed to load tasks asynchronously:", error);
+    initializeTaskBoard(getTasks(), createNewTaskAsync);
+}
+
+}
+
+document.addEventListener("DOMContentLoaded", initApp);
+
+  </code></pre>
+                <h3>Expected Result &amp; Debugging Notes</h3>
+                <ul>
+                    <li>
+                        <strong>Expected Result:</strong> On page reload, the
+                        board renders after a brief 350ms simulated fetch.
+                        Clicking <strong>New Task</strong> and submitting valid
+                        data changes the button text to
+                        <code>Saving...</code> while the Promise is
+                        <code>pending</code>, then closes the modal and updates
+                        the board and metrics once the Promise settles.
+                    </li>
+                    <li>
+                        <strong
+                            >Debugging Note 1 (Forgetting
+                            <code>await</code>):</strong
+                        >
+                        If you write
+                        <code>const task = createTask(...)</code> without
+                        <code>await</code>, <code>task</code> is a
+                        <code>Promise</code> object&mdash;which is always truthy
+                        in an <code>if (!task)</code> check! Always
+                        <code>await</code> Promise-returning functions before
+                        inspecting their resolved values.
+                    </li>
+                    <li>
+                        <strong>Debugging Note 2 (Uncaught Rejections):</strong>
+                        Every <code>await</code> call that might reject (such as
+                        <code>addTaskAsync</code> or
+                        <code>deleteTaskAsync</code>) must sit inside a
+                        <code>try / catch</code> block so errors surface cleanly
+                        in <code>#task-form-error</code> rather than failing
+                        silently as unhandled Promise rejections.
+                    </li>
+                </ul>
+            </section>
+
+            <!-- SECTION 5: CLASSWORK -->
+            <section>
+                <h2>5. Classwork</h2>
+
+                <h3>Task: Asynchronous Task Status Transition</h3>
+                <p>
+                    Extend the Kanban board's database and task utility modules
+                    to support asynchronous status updates (for example, moving
+                    a task from <code>todo</code> to <code>in_progress</code> or
+                    <code>done</code>) with simulated latency and validation.
+                </p>
+
+                <h3>Requirements</h3>
+                <ol>
+                    <li>
+                        In <code>dist/assets/js/database/mockDb.js</code>,
+                        implement and export an
+                        <code
+                            >async function updateTaskAsync(taskId,
+                            changes)</code
+                        >
+                        that:
+                        <ul>
+                            <li>Awaits <code>simulateLatency(250)</code>.</li>
+                            <li>
+                                Finds the matching task by comparing
+                                <code
+                                    >String(currentTask.id) ===
+                                    String(taskId)</code
+                                >.
+                            </li>
+                            <li>
+                                Validates the merged task object with
+                                <code>isValidTask()</code>.
+                            </li>
+                            <li>
+                                Throws an <code>Error</code> if the task is not
+                                found or if the resulting task fails validation.
+                            </li>
+                            <li>
+                                Applies <code>changes</code>, calls
+                                <code>syncToStorage()</code>, and returns a
+                                shallow copy of the updated task.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        In <code>dist/assets/js/utils/tasks.js</code>, import
+                        <code>updateTaskAsync</code> and implement and export an
+                        <code
+                            >async function updateTaskStatusAsync(taskId,
+                            newStatus)</code
+                        >
+                        that validates
+                        <code>VALID_STATUSES.includes(newStatus)</code> before
+                        calling
+                        <code
+                            >updateTaskAsync(taskId, { status: newStatus
+                            })</code
+                        >.
+                    </li>
+                </ol>
+
+                <h3>Observable Acceptance Criteria</h3>
+                <ul>
+                    <li>
+                        Running the following snippet in the browser DevTools
+                        Console moves task <code>201</code> from
+                        <code>todo</code> to <code>review</code> after ~250ms
+                        and persists the change across page refreshes:
+                        <pre><code>// Test in DevTools Console (assuming modules or helper exposure)
+
+// Expected: Promise resolves to updated task object with status: "review"
+     </code></pre>
+                    </li>
+                    <li>
+                        Passing an invalid status such as
+                        <code>"archived"</code> rejects cleanly with a
+                        descriptive <code>Error</code> without mutating
+                        <code>localStorage</code>.
+                    </li>
+                </ul>
+                <div class="callout">
+                    <div class="callout-title">
+                        Instructor Answer Key (Keep Separate from Student
+                        Prompt)
+                    </div>
+                    <pre><code>// 1. Inside dist/assets/js/database/mockDb.js
+
+async function updateTaskAsync(taskId, changes) {
+await simulateLatency(250);
+
+const task = tasks.find(
+    (currentTask) =&gt; String(currentTask.id) === String(taskId),
+);
+
+if (!task) {
+    throw new Error(`Task with ID '${taskId}' was not found.`);
+}
+
+const updatedTest = Object.assign({}, task, changes);
+if (!isValidTask(updatedTest)) {
+    throw new Error("Invalid task update payload.");
+}
+
+Object.assign(task, changes);
+syncToStorage();
+return Object.assign({}, task);
+
+}
+
+// 2. Inside dist/assets/js/utils/tasks.js
+const updateTaskStatusAsync = async (taskId, newStatus) => {
+if (!VALID_STATUSES.includes(newStatus)) {
+throw new Error(`Invalid target status '${newStatus}'.`);
+}
+return await updateTaskAsync(taskId, { status: newStatus });
+};
+
+
+
+    </code></pre>
+                </div>
+            </section>
+            <!-- SECTION 6: DEBRIEF AND HOMEWORK -->
+            <section>
+                <h2>6. Debrief and Homework</h2>
+
+                <h3>Key Takeaways</h3>
+                <ol>
+                    <li>
+                        <strong>Non-Blocking Architecture:</strong> JavaScript
+                        executes on a single Call Stack, delegating asynchronous
+                        operations to browser Web APIs and coordinating
+                        completion via the Event Loop.
+                    </li>
+                    <li>
+                        <strong>Queue Priority:</strong> The Event Loop drains
+                        all Microtasks (<code>Promise.then</code>,
+                        <code>catch</code>, <code>finally</code>, and post-<code
+                            >await</code
+                        >
+                        continuations) before executing the next Macrotask
+                        (<code>setTimeout</code>, DOM events).
+                    </li>
+                    <li>
+                        <strong>Promise States:</strong> Every Promise starts as
+                        <code>pending</code> and settles permanently into either
+                        <code>fulfilled</code> or <code>rejected</code>.
+                    </li>
+                    <li>
+                        <strong>Clean Async Boundaries:</strong> Keeping
+                        simulated latency and storage Promises inside
+                        <code>mockDb.js</code> ensures
+                        <code>script.js</code> only awaits domain operations and
+                        renders updated state without knowing how persistence is
+                        implemented.
+                    </li>
+                </ol>
+
+                <h3>Reflective Engineering Questions</h3>
+                <ol>
+                    <li>
+                        <em
+                            >Why did we call <code>initializeUI()</code> before
+                            <code>await loadTasksAsync()</code> inside
+                            <code>dist/assets/js/app.js</code> instead of
+                            putting both calls after the <code>await</code>?</em
+                        >
+                    </li>
+                    <li>
+                        <em
+                            >What bug occurs if an event listener forgets to
+                            <code>await</code> an async database function before
+                            calling <code>getTasks()</code> and
+                            <code>refreshDashboard()</code>?</em
+                        >
+                    </li>
+                    <li>
+                        <em
+                            >How does disabling the Save button (<code
+                                >saveBtn.disabled = true</code
+                            >) inside a <code>try / finally</code> block protect
+                            both user experience and application state?</em
+                        >
+                    </li>
+                </ol>
+
+                <h3>
+                    Homework Assignment: Asynchronous Board Refresh &amp;
+                    Loading Feedback
+                </h3>
+                <p>
+                    Enhance the Kanban board's user experience during
+                    asynchronous startup and updates using only vanilla HTML,
+                    CSS, and JavaScript.
+                </p>
+
+                <h4>Assignment Requirements</h4>
+                <ol>
+                    <li>
+                        In <code>dist/index.html</code>, add a subtle status
+                        banner or indicator inside
+                        <code>&lt;main class="kanban-board"&gt;</code> (for
+                        example,
+                        <code
+                            >&lt;p id="board-status" class="board-status"
+                            aria-live="polite"&gt;&lt;/p&gt;</code
+                        >) directly above <code>.board-columns-container</code>.
+                    </li>
+                    <li>
+                        In <code>dist/assets/js/dom/script.js</code>, export a
+                        helper function
+                        <code
+                            >setBoardStatus(message, documentRef =
+                            document)</code
+                        >
+                        that updates the text content of
+                        <code>#board-status</code>.
+                    </li>
+                    <li>
+                        In <code>dist/assets/js/app.js</code>, display
+                        <code>"Loading sprint tasks..."</code> before awaiting
+                        <code>loadTasksAsync()</code>, clear the message once
+                        <code>initializeTaskBoard()</code> completes, and
+                        display an accessible error message if loading rejects.
+                    </li>
+                    <li>
+                        Ensure that when <code>mockDb.js</code> later switches
+                        from <code>localStorage</code> to a real HTTP API,
+                        neither <code>app.js</code> nor
+                        <code>script.js</code> needs structural changes.
+                    </li>
+                </ol>
+
+                <h4>Submission Criteria</h4>
+                <ul>
+                    <li>
+                        Verify in Chrome DevTools that
+                        <code>#board-status</code> displays
+                        <code>"Loading sprint tasks..."</code> briefly on reload
+                        and clears automatically once the four columns render.
+                    </li>
+                    <li>
+                        Confirm that all existing features (creating tasks,
+                        deleting tasks, toggling dark/light theme, and opening
+                        the activity drawer) continue working without console
+                        errors.
+                    </li>
+                </ul>
+            </section>
+
+            <footer>
+                <p>
+                    Practical Software Engineering Curriculum &bull; Agile Task
+                    Board Architecture (Kanban-Style)
+                </p>
+            </footer>
+        </div>
+    </body>
+</html>
